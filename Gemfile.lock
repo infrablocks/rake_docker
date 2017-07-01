@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rake_docker (0.1.0)
+    rake_docker (0.2.0)
 
 GEM
   remote: https://rubygems.org/

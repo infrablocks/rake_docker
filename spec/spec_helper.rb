@@ -1,4 +1,11 @@
+require 'simplecov'
+SimpleCov.start
+
 require 'bundler/setup'
+
+require 'rake'
+require 'support/shared_contexts/rake'
+
 require 'rake_docker'
 
 RSpec.configure do |config|

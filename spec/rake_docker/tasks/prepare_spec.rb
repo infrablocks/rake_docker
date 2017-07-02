@@ -10,7 +10,7 @@ describe RakeDocker::Tasks::Prepare do
   it 'adds a prepare task in the namespace in which it is created' do
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
       end
     end
@@ -21,7 +21,7 @@ describe RakeDocker::Tasks::Prepare do
   it 'gives the prepare task a description' do
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
       end
     end
@@ -32,7 +32,7 @@ describe RakeDocker::Tasks::Prepare do
   it 'allows the task name to be overridden' do
     namespace :image do
       subject.new(:assemble) do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
       end
     end
@@ -43,14 +43,14 @@ describe RakeDocker::Tasks::Prepare do
   it 'allows multiple prepare tasks to be declared' do
     namespace :image1 do
       subject.new do |t|
-        t.image = 'image1'
+        t.image_name = 'image1'
         t.work_directory = 'build'
       end
     end
 
     namespace :image2 do
       subject.new do |t|
-        t.image = 'image2'
+        t.image_name = 'image2'
         t.work_directory = 'build'
       end
     end
@@ -62,16 +62,26 @@ describe RakeDocker::Tasks::Prepare do
     expect(image2_prepare).not_to be_nil
   end
 
-  it 'fails if no image is provided' do
+  it 'fails if no image name is provided' do
     expect {
-      subject.new
+      subject.new do |t|
+        t.work_directory = 'build'
+      end
+    }.to raise_error(RakeDocker::RequiredParameterUnset)
+  end
+
+  it 'fails if no work directory is provided' do
+    expect {
+      subject.new do |t|
+        t.image_name = 'thing'
+      end
     }.to raise_error(RakeDocker::RequiredParameterUnset)
   end
 
   it 'recursively makes the build directory' do
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
       end
     end
@@ -87,7 +97,7 @@ describe RakeDocker::Tasks::Prepare do
 
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.copy_spec = ['file1.txt', 'file2.rb']
@@ -106,7 +116,7 @@ describe RakeDocker::Tasks::Prepare do
 
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.copy_spec = [
@@ -129,7 +139,7 @@ describe RakeDocker::Tasks::Prepare do
 
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.copy_spec = ['source']
@@ -149,7 +159,7 @@ describe RakeDocker::Tasks::Prepare do
 
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.copy_spec = ['source/.']
@@ -169,7 +179,7 @@ describe RakeDocker::Tasks::Prepare do
 
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.copy_spec = [{from: 'source/.', to: 'the/destination'}]
@@ -185,7 +195,7 @@ describe RakeDocker::Tasks::Prepare do
   it 'creates file from content' do
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.create_spec = [
@@ -203,7 +213,7 @@ describe RakeDocker::Tasks::Prepare do
   it 'creates destination directory when specified' do
     namespace :image do
       subject.new do |t|
-        t.image = 'nginx'
+        t.image_name = 'nginx'
         t.work_directory = 'build'
 
         t.create_spec = [

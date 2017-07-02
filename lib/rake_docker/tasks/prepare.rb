@@ -4,7 +4,8 @@ module RakeDocker
   module Tasks
     class Prepare < TaskLib
       parameter :name, :default => :prepare
-      parameter :image, :required => true
+
+      parameter :image_name, :required => true
 
       parameter :work_directory, :required => true
 
@@ -16,9 +17,9 @@ module RakeDocker
       end
 
       def define
-        desc "Prepare for build of #{image} image"
+        desc "Prepare for build of #{image_name} image"
         task name do
-          image_directory = File.join(work_directory, image)
+          image_directory = File.join(work_directory, image_name)
           mkdir_p image_directory
 
           copy_spec.each do |entry|

@@ -14,17 +14,21 @@ describe RakeDocker::Tasks::Tag do
         t.image_name = 'nginx'
         t.repository_name = 'my-org/nginx'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+
+        t.tags = ['latest']
       end
     end
 
     expect(Rake::Task['image:tag']).not_to be_nil
   end
 
-  it 'gives the build task a description' do
+  it 'gives the tag task a description' do
     subject.new do |t|
       t.image_name = 'nginx'
       t.repository_name = 'my-org/nginx'
       t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+
+      t.tags = ['latest']
     end
 
     expect(rake.last_description).to(eq('Tag nginx image for repository'))
@@ -36,6 +40,8 @@ describe RakeDocker::Tasks::Tag do
         t.image_name = 'nginx'
         t.repository_name = 'my-org/nginx'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+
+        t.tags = ['latest']
       end
     end
 
@@ -48,6 +54,8 @@ describe RakeDocker::Tasks::Tag do
         t.image_name = 'image1'
         t.repository_name = 'my-org/image1'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image1'
+
+        t.tags = ['latest']
       end
     end
 
@@ -56,6 +64,8 @@ describe RakeDocker::Tasks::Tag do
         t.image_name = 'image2'
         t.repository_name = 'my-org/image2'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2'
+
+        t.tags = ['latest']
       end
     end
 
@@ -71,6 +81,8 @@ describe RakeDocker::Tasks::Tag do
       subject.new do |t|
         t.repository_name = 'my-org/thing'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+
+        t.tags = ['latest']
       end
     }.to raise_error(RakeDocker::RequiredParameterUnset)
   end
@@ -80,6 +92,8 @@ describe RakeDocker::Tasks::Tag do
       subject.new do |t|
         t.image_name = 'thing'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+
+        t.tags = ['latest']
       end
     }.to raise_error(RakeDocker::RequiredParameterUnset)
   end
@@ -89,14 +103,27 @@ describe RakeDocker::Tasks::Tag do
       subject.new do |t|
         t.image_name = 'thing'
         t.repository_name = 'my-org/thing'
+
+        t.tags = ['latest']
       end
     }.to raise_error(RakeDocker::RequiredParameterUnset)
   end
 
-  it 'tags the image for the repository URL and supplied tag when present' do
+  it 'fails if no tags array is provided' do
+    expect {
+      subject.new do |t|
+        t.image_name = 'thing'
+        t.repository_name = 'my-org/thing'
+        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+      end
+    }.to raise_error(RakeDocker::RequiredParameterUnset)
+  end
+
+  it 'tags the image for the repository URL and supplied tags when present' do
     repository_name = 'my-org/nginx'
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-    tag = 'really-important-tag'
+    tag1 = 'really-important-tag'
+    tag2 = 'other-important-tag'
 
     namespace :image do
       subject.new do |t|
@@ -104,7 +131,7 @@ describe RakeDocker::Tasks::Tag do
         t.repository_name = repository_name
         t.repository_url = repository_url
 
-        t.tag = tag
+        t.tags = [tag1, tag2]
       end
     end
 
@@ -116,7 +143,10 @@ describe RakeDocker::Tasks::Tag do
                 .and_return([image]))
     expect(image)
         .to(receive(:tag)
-                .with(repo: repository_url, tag: tag, force: true))
+                .with(repo: repository_url, tag: tag1, force: true))
+    expect(image)
+        .to(receive(:tag)
+                .with(repo: repository_url, tag: tag2, force: true))
 
     Rake::Task['image:tag'].invoke
   end
@@ -134,7 +164,7 @@ describe RakeDocker::Tasks::Tag do
           "123.dkr.ecr.eu-west-2.amazonaws.com/my-org/#{params.image_name}"
         end
 
-        t.tag = tag
+        t.tags = [tag]
       end
     end
 
@@ -153,7 +183,7 @@ describe RakeDocker::Tasks::Tag do
     Rake::Task['image:tag'].invoke
   end
 
-  it 'uses the provided tag factory when supplied' do
+  it 'uses the provided tags factory when supplied' do
     repository_name = 'my-org/nginx'
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
@@ -163,8 +193,8 @@ describe RakeDocker::Tasks::Tag do
         t.repository_name = repository_name
         t.repository_url = repository_url
 
-        t.tag = lambda do |params|
-          "#{params.image_name}-123"
+        t.tags = lambda do |params|
+          ["#{params.image_name}-123", 'latest']
         end
       end
     end
@@ -180,66 +210,6 @@ describe RakeDocker::Tasks::Tag do
                 .with(repo: repository_url,
                       tag: 'nginx-123',
                       force: true))
-
-
-    Rake::Task['image:tag'].invoke
-  end
-
-  it 'additionally tags the image as latest when tag_as_latest is true' do
-    repository_name = 'my-org/nginx'
-    repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-    namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_name = repository_name
-        t.repository_url = repository_url
-
-        t.tag = '123'
-        t.tag_as_latest = true
-      end
-    end
-
-    image = double('image')
-
-    expect(Docker::Image)
-        .to(receive(:all)
-                .with(filter: repository_name)
-                .and_return([image]))
-    expect(image)
-        .to(receive(:tag)
-                .with(repo: repository_url,
-                      tag: '123',
-                      force: true))
-    expect(image)
-        .to(receive(:tag)
-                .with(repo: repository_url,
-                      tag: 'latest',
-                      force: true))
-
-    Rake::Task['image:tag'].invoke
-  end
-
-  it 'only tags the image as latest when no tag is specified and tag_as_latest is true' do
-    repository_name = 'my-org/nginx'
-    repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-    namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_name = repository_name
-        t.repository_url = repository_url
-
-        t.tag_as_latest = true
-      end
-    end
-
-    image = double('image')
-
-    expect(Docker::Image)
-        .to(receive(:all)
-                .with(filter: repository_name)
-                .and_return([image]))
     expect(image)
         .to(receive(:tag)
                 .with(repo: repository_url,
@@ -260,7 +230,7 @@ describe RakeDocker::Tasks::Tag do
         t.repository_name = repository_name
         t.repository_url = repository_url
 
-        t.tag = tag
+        t.tags = [tag]
       end
     end
 

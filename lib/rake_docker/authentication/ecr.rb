@@ -8,7 +8,7 @@ module RakeDocker
         config = OpenStruct.new(
             region: nil,
             registry_id: nil)
-        block.call(*[config].slice(0, block.arity))
+        block.call(config)
 
         @ecr_client = Aws::ECR::Client.new(region: config.region)
 

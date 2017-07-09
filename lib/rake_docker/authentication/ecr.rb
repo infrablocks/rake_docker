@@ -3,7 +3,7 @@ require 'ostruct'
 
 module RakeDocker
   module Authentication
-    class ECR
+    class ECR < Proc
       def initialize &block
         config = OpenStruct.new(
             region: nil,

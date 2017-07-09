@@ -3,7 +3,7 @@ require 'ostruct'
 
 module RakeDocker
   module Authentication
-    class ECR < Proc
+    class ECR
       def initialize &block
         config = OpenStruct.new(
             region: nil,
@@ -15,6 +15,10 @@ module RakeDocker
         @registry_id = config.registry_id.respond_to?(:call) ?
             config.registry_id.call :
             config.registry_id
+      end
+
+      def arity
+        0
       end
 
       def call

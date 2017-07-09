@@ -1,4 +1,5 @@
 require 'docker'
+require 'ostruct'
 require_relative '../tasklib'
 
 module RakeDocker
@@ -19,12 +20,12 @@ module RakeDocker
       def define
         desc "Push #{image_name} image to repository"
         task name do
-          params = OpenStruct.new({
+          params = OpenStruct.new(
               image_name: image_name,
               repository_url: repository_url,
               credentials: credentials,
               tag: tags
-          })
+          )
 
           derived_repository_url = repository_url.respond_to?(:call) ?
               repository_url.call(*[params].slice(0, repository_url.arity)) :

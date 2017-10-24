@@ -20,6 +20,8 @@ module RakeDocker
       parameter :copy_spec, :default => []
       parameter :create_spec, :default => []
 
+      parameter :argument_names, :default => []
+
       parameter :tags, :required => true
 
       parameter :credentials
@@ -66,6 +68,7 @@ module RakeDocker
         end
         Tag.new do |t|
           t.name = tag_task_name
+          t.argument_names = argument_names
           t.image_name = image_name
           t.repository_name = repository_name
           t.repository_url = repository_url
@@ -73,6 +76,7 @@ module RakeDocker
         end
         Push.new do |t|
           t.name = push_task_name
+          t.argument_names = argument_names
           t.image_name = image_name
           t.repository_url = repository_url
           t.tags = tags

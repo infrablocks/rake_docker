@@ -291,6 +291,30 @@ describe RakeDocker::Tasks::All do
         t.tag_task_name = :tag_it_now
       end
     end
+
+    it 'uses an empty array for argument names by default' do
+      tag_configurer = stubbed_tag_configurer
+
+      expect(RakeDocker::Tasks::Tag)
+          .to(receive(:new).and_yield(tag_configurer))
+      expect(tag_configurer)
+          .to(receive(:argument_names=).with([]))
+
+      define_tasks
+    end
+
+    it 'uses the provided argument names when supplied' do
+      tag_configurer = stubbed_tag_configurer
+
+      expect(RakeDocker::Tasks::Tag)
+          .to(receive(:new).and_yield(tag_configurer))
+      expect(tag_configurer)
+          .to(receive(:argument_names=).with([:org_name]))
+
+      define_tasks do |t|
+        t.argument_names = [:org_name]
+      end
+    end
   end
 
   context 'push task' do
@@ -367,6 +391,31 @@ describe RakeDocker::Tasks::All do
         t.credentials = credentials
       end
     end
+
+
+    it 'uses an empty array for argument names by default' do
+      push_configurer = stubbed_push_configurer
+
+      expect(RakeDocker::Tasks::Push)
+          .to(receive(:new).and_yield(push_configurer))
+      expect(push_configurer)
+          .to(receive(:argument_names=).with([]))
+
+      define_tasks
+    end
+
+    it 'uses the provided argument names when supplied' do
+      push_configurer = stubbed_push_configurer
+
+      expect(RakeDocker::Tasks::Push)
+          .to(receive(:new).and_yield(push_configurer))
+      expect(push_configurer)
+          .to(receive(:argument_names=).with([:org_name]))
+
+      define_tasks do |t|
+        t.argument_names = [:org_name]
+      end
+    end
   end
 
   def define_tasks(&block)
@@ -407,13 +456,13 @@ describe RakeDocker::Tasks::All do
   end
 
   def stubbed_tag_configurer
-    double_allowing(:name=, :image_name=,
+    double_allowing(:name=, :argument_names=, :image_name=,
                     :repository_name=, :repository_url=,
                     :tags=)
   end
 
   def stubbed_push_configurer
-    double_allowing(:name=, :image_name=, :repository_url=, :tags=,
-                    :credentials=)
+    double_allowing(:name=, :argument_names=, :image_name=, :repository_url=,
+                    :tags=, :credentials=)
   end
 end

@@ -6,6 +6,7 @@ module RakeDocker
   module Tasks
     class Tag < TaskLib
       parameter :name, :default => :tag
+      parameter :argument_names, :default => []
 
       parameter :image_name, :required => true
       parameter :repository_name, :required => true
@@ -19,17 +20,17 @@ module RakeDocker
 
       def define
         desc "Tag #{image_name} image for repository"
-        task name do
+        task name, argument_names do |_, args|
           params = OpenStruct.new(
               image_name: image_name,
               repository_name: repository_name
           )
 
           derived_repository_url = repository_url.respond_to?(:call) ?
-              repository_url.call(*[params].slice(0, repository_url.arity)) :
+              repository_url.call(*[args, params].slice(0, repository_url.arity)) :
               repository_url
           derived_tags = tags.respond_to?(:call) ?
-              tags.call(*[params].slice(0, tags.arity)) :
+              tags.call(*[args, params].slice(0, tags.arity)) :
               tags
 
           images = Docker::Image.all(filter: repository_name)

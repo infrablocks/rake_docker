@@ -6,6 +6,7 @@ module RakeDocker
   module Tasks
     class Push < TaskLib
       parameter :name, :default => :push
+      parameter :argument_names, :default => []
 
       parameter :image_name, :required => true
       parameter :repository_url, :required => true
@@ -19,7 +20,7 @@ module RakeDocker
 
       def define
         desc "Push #{image_name} image to repository"
-        task name do
+        task name, argument_names do |_, args|
           params = OpenStruct.new(
               image_name: image_name,
               repository_url: repository_url,
@@ -28,13 +29,13 @@ module RakeDocker
           )
 
           derived_repository_url = repository_url.respond_to?(:call) ?
-              repository_url.call(*[params].slice(0, repository_url.arity)) :
+              repository_url.call(*[args, params].slice(0, repository_url.arity)) :
               repository_url
           derived_credentials = credentials.respond_to?(:call) ?
-              credentials.call(*[params].slice(0, credentials.arity)) :
+              credentials.call(*[args, params].slice(0, credentials.arity)) :
               credentials
           derived_tags = tags.respond_to?(:call) ?
-              tags.call(*[params].slice(0, tags.arity)) :
+              tags.call(*[args, params].slice(0, tags.arity)) :
               tags
 
           Docker.authenticate!(derived_credentials) if derived_credentials

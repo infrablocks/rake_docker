@@ -72,6 +72,24 @@ describe RakeDocker::Tasks::Push do
     expect(image2_push).not_to be_nil
   end
 
+  it 'configures the task with the provided arguments if specified' do
+    argument_names = [:deployment_identifier, :region]
+
+    namespace :image do
+      subject.new do |t|
+        t.argument_names = argument_names
+
+        t.image_name = 'image2'
+        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2'
+
+        t.tags = ['latest']
+      end
+    end
+
+    expect(Rake::Task['image:push'].arg_names)
+        .to(eq(argument_names))
+  end
+
   it 'fails if no image name is provided' do
     expect {
       subject.new do |t|
@@ -118,14 +136,16 @@ describe RakeDocker::Tasks::Push do
   it 'authenticates using the provided credentials factory when present' do
     namespace :image do
       subject.new do |t|
+        t.argument_names = [:org_name]
+
         t.image_name = 'nginx'
         t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
-        t.credentials = lambda do |params|
+        t.credentials = lambda do |args, params|
           {
               username: "#{params.image_name}",
               password: 'pass',
-              email: 'user@userorg.com',
+              email: "user@#{args.org_name}.com",
               serveraddress: "#{params.repository_url}"
           }
         end
@@ -143,7 +163,7 @@ describe RakeDocker::Tasks::Push do
                           serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
                       }))
 
-    Rake::Task['image:push'].invoke
+    Rake::Task['image:push'].invoke('userorg')
   end
 
   it 'does not authenticate when no credentials are provided' do
@@ -187,13 +207,15 @@ describe RakeDocker::Tasks::Push do
   end
 
   it 'uses the provided repository URL factory when supplied' do
-    expected_repository_url = "123.dkr.my.org/nginx"
+    expected_repository_url = "123.dkr.myorg/nginx"
 
     namespace :image do
       subject.new do |t|
+        t.argument_names = [:org_name]
+
         t.image_name = 'nginx'
-        t.repository_url = lambda do |params|
-          "123.dkr.my.org/#{params.image_name}"
+        t.repository_url = lambda do |args, params|
+          "123.dkr.#{args.org_name}/#{params.image_name}"
         end
 
         t.tags = ['latest']
@@ -208,7 +230,7 @@ describe RakeDocker::Tasks::Push do
     expect(image)
         .to(receive(:push).with(nil, tag: 'latest'))
 
-    Rake::Task['image:push'].invoke
+    Rake::Task['image:push'].invoke('myorg')
   end
 
   it 'uses the provided tags factory when supplied' do
@@ -216,11 +238,13 @@ describe RakeDocker::Tasks::Push do
 
     namespace :image do
       subject.new do |t|
+        t.argument_names = [:org_name]
+
         t.image_name = 'nginx'
         t.repository_url = repository_url
 
-        t.tags = lambda do |params|
-          ["#{params.image_name}_latest"]
+        t.tags = lambda do |args, params|
+          ["#{params.image_name}_#{args.org_name}"]
         end
       end
     end
@@ -231,9 +255,9 @@ describe RakeDocker::Tasks::Push do
                 .with(filter: repository_url)
                 .and_return([image]))
     expect(image)
-        .to(receive(:push).with(nil, tag: 'nginx_latest'))
+        .to(receive(:push).with(nil, tag: 'nginx_myorg'))
 
-    Rake::Task['image:push'].invoke
+    Rake::Task['image:push'].invoke('myorg')
   end
 
   it 'raises an exception if no image can be found' do

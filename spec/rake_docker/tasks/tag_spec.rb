@@ -76,6 +76,25 @@ describe RakeDocker::Tasks::Tag do
     expect(image2_tag).not_to be_nil
   end
 
+  it 'configures the task with the provided arguments if specified' do
+    argument_names = [:deployment_identifier, :region]
+
+    namespace :image do
+      subject.new do |t|
+        t.argument_names = argument_names
+
+        t.image_name = 'image'
+        t.repository_name = 'my-org/image'
+        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image'
+
+        t.tags = ['latest']
+      end
+    end
+
+    expect(Rake::Task['image:tag'].arg_names)
+        .to(eq(argument_names))
+  end
+
   it 'fails if no image name is provided' do
     expect {
       subject.new do |t|
@@ -157,11 +176,13 @@ describe RakeDocker::Tasks::Tag do
 
     namespace :image do
       subject.new do |t|
+        t.argument_names = [:org_name]
+
         t.image_name = 'nginx'
         t.repository_name = repository_name
 
-        t.repository_url = lambda do |params|
-          "123.dkr.ecr.eu-west-2.amazonaws.com/my-org/#{params.image_name}"
+        t.repository_url = lambda do |args, params|
+          "123.dkr.ecr.eu-west-2.amazonaws.com/#{args.org_name}/#{params.image_name}"
         end
 
         t.tags = [tag]
@@ -180,7 +201,7 @@ describe RakeDocker::Tasks::Tag do
                       tag: tag,
                       force: true))
 
-    Rake::Task['image:tag'].invoke
+    Rake::Task['image:tag'].invoke('my-org')
   end
 
   it 'uses the provided tags factory when supplied' do
@@ -189,12 +210,14 @@ describe RakeDocker::Tasks::Tag do
 
     namespace :image do
       subject.new do |t|
+        t.argument_names = [:org_name]
+
         t.image_name = 'nginx'
         t.repository_name = repository_name
         t.repository_url = repository_url
 
-        t.tags = lambda do |params|
-          ["#{params.image_name}-123", 'latest']
+        t.tags = lambda do |args, params|
+          ["#{params.image_name}-123", 'latest', args.org_name]
         end
       end
     end
@@ -215,8 +238,13 @@ describe RakeDocker::Tasks::Tag do
                 .with(repo: repository_url,
                       tag: 'latest',
                       force: true))
+    expect(image)
+        .to(receive(:tag)
+                .with(repo: repository_url,
+                      tag: 'my-org',
+                      force: true))
 
-    Rake::Task['image:tag'].invoke
+    Rake::Task['image:tag'].invoke('my-org')
   end
 
   it 'raises an exception if no image can be found' do

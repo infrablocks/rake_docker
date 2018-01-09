@@ -238,6 +238,58 @@ describe RakeDocker::Tasks::All do
         t.prepare_task_name = :prepare_it
       end
     end
+
+    it 'passes a nil credentials when none supplied' do
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:credentials=).with(nil))
+
+      define_tasks
+    end
+
+    it 'passes the provided credentials when supplied' do
+      credentials = {
+          username: 'username'
+      }
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:credentials=).with(credentials))
+
+      define_tasks do |t|
+        t.credentials = credentials
+      end
+    end
+
+
+    it 'uses an empty array for argument names by default' do
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:argument_names=).with([]))
+
+      define_tasks
+    end
+
+    it 'uses the provided argument names when supplied' do
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:argument_names=).with([:org_name]))
+
+      define_tasks do |t|
+        t.argument_names = [:org_name]
+      end
+    end
   end
 
   context 'tag task' do
@@ -450,9 +502,9 @@ describe RakeDocker::Tasks::All do
   end
 
   def stubbed_build_configurer
-    double_allowing(:name=, :image_name=,
+    double_allowing(:name=, :argument_names=, :image_name=,
                     :repository_name=, :work_directory=,
-                    :prepare_task=)
+                    :credentials=, :prepare_task=)
   end
 
   def stubbed_tag_configurer

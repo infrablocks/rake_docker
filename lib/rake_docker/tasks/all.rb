@@ -61,9 +61,11 @@ module RakeDocker
         end
         Build.new  do |t|
           t.name = build_task_name
+          t.argument_names = argument_names
           t.image_name = image_name
           t.repository_name = repository_name
           t.work_directory = work_directory
+          t.credentials = credentials
           t.prepare_task = prepare_task_name
         end
         Tag.new do |t|

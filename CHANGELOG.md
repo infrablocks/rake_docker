@@ -1,3 +1,10 @@
+## 0.11.0 (January 9th, 2018)
+
+IMPROVEMENTS:
+
+* If credentials are provided, the build task will now authenticate prior to
+  building to allow images to be built with private base images.
+
 ## 0.10.0 (October 24th, 2017)
 
 BACKWARDS INCOMPATIBILITIES / NOTES:

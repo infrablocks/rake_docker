@@ -100,6 +100,71 @@ describe RakeDocker::Tasks::Build do
     }.to raise_error(RakeDocker::RequiredParameterUnset)
   end
 
+  it 'authenticates using the provided credentials when present' do
+    credentials = {
+        username: 'user',
+        password: 'pass',
+        email: 'user@userorg.com',
+        serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com'
+    }
+
+    define_task do |t|
+      t.image_name = 'nginx'
+      t.repository_name = 'my-org/thing'
+      t.work_directory = 'build'
+
+      t.credentials = credentials
+    end
+
+    expect(Docker)
+        .to(receive(:authenticate!)
+                .with(credentials))
+
+    Rake::Task['image:build'].invoke
+  end
+
+  it 'authenticates using the provided credentials factory when present' do
+    define_task do |t|
+      t.argument_names = [:org_name]
+
+      t.image_name = 'thing'
+      t.repository_name = 'my-org/thing'
+      t.work_directory = 'build'
+
+      t.credentials = lambda do |args, params|
+        {
+            username: "#{params.image_name}",
+            password: 'pass',
+            email: "user@#{args.org_name}.com",
+            serveraddress: "123.dkr.ecr.eu-west-2.amazonaws.com/#{params.repository_name}"
+        }
+      end
+    end
+
+    expect(Docker)
+        .to(receive(:authenticate!)
+                .with({
+                          username: 'thing',
+                          password: 'pass',
+                          email: 'user@userorg.com',
+                          serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
+                      }))
+
+    Rake::Task['image:build'].invoke('userorg')
+  end
+
+  it 'does not authenticate when no credentials are provided' do
+    define_task do |t|
+      t.image_name = 'thing'
+      t.repository_name = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
+      t.work_directory = 'build'
+    end
+
+    expect(Docker).not_to(receive(:authenticate!))
+
+    Rake::Task['image:build'].invoke
+  end
+
   it 'builds the image in the correct work directory tagging with the repository name' do
     define_task do |t|
       t.image_name = 'nginx'

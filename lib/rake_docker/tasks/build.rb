@@ -5,9 +5,12 @@ module RakeDocker
   module Tasks
     class Build < TaskLib
       parameter :name, :default => :build
+      parameter :argument_names, :default => []
 
       parameter :image_name, :required => true
       parameter :repository_name, :required => true
+
+      parameter :credentials
 
       parameter :work_directory, :required => true
 
@@ -23,7 +26,20 @@ module RakeDocker
             []
 
         desc "Build #{image_name} image"
-        task name => prerequisites do
+        task name, argument_names => prerequisites do |_, args|
+          params = OpenStruct.new(
+              image_name: image_name,
+              repository_name: repository_name,
+              credentials: credentials,
+              work_directory: work_directory
+          )
+
+          derived_credentials = credentials.respond_to?(:call) ?
+              credentials.call(*[args, params].slice(0, credentials.arity)) :
+              credentials
+
+          Docker.authenticate!(derived_credentials) if derived_credentials
+
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),
               {t: repository_name}) do |chunk|

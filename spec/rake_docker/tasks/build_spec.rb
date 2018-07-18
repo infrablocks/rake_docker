@@ -188,8 +188,8 @@ describe RakeDocker::Tasks::Build do
 
     allow(Docker::Image)
         .to(receive(:build_from_dir)
-                .and_yield('progress-message-1')
-                .and_yield('progress-message-2'))
+                .and_yield('{"stream":"progress-message-1"}')
+                .and_yield('{"stream":"progress-message-2"}'))
     expect($stdout)
         .to(receive(:puts)
                 .with('progress-message-1'))

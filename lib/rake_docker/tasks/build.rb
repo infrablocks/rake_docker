@@ -1,5 +1,4 @@
 require 'docker'
-require 'json'
 require_relative '../tasklib'
 
 module RakeDocker
@@ -44,7 +43,7 @@ module RakeDocker
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),
               {t: repository_name}) do |chunk|
-            $stdout.puts JSON.parse(chunk)['stream']
+            $stdout.puts chunk
           end
         end
       end

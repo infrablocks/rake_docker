@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rake_docker (0.13.0)
+    rake_docker (0.14.0)
       aws-sdk (~> 2.10)
       docker-api (~> 1.34)
 

@@ -1,5 +1,6 @@
 require 'docker'
 require_relative '../tasklib'
+require_relative '../../docker_output'
 
 module RakeDocker
   module Tasks
@@ -43,7 +44,7 @@ module RakeDocker
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),
               {t: repository_name}) do |chunk|
-            $stdout.puts chunk
+            DockerOutput.puts chunk
           end
         end
       end

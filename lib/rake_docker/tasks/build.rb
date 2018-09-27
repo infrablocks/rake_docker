@@ -44,7 +44,7 @@ module RakeDocker
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),
               {t: repository_name}) do |chunk|
-            DockerOutput.puts chunk
+            DockerOutput.print chunk
           end
         end
       end

@@ -4,7 +4,7 @@ describe RakeDocker::Tasks::Push do
   include_context :rake
 
   before(:each) do
-    stub_puts
+    stub_print
     stub_docker_authenticate
     stub_docker_image_search
   end
@@ -286,7 +286,7 @@ describe RakeDocker::Tasks::Push do
                  '\'123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx\''))
   end
 
-  it 'puts push progress to stdout' do
+  it 'print push progress to stdout' do
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
     namespace :image do
@@ -308,19 +308,19 @@ describe RakeDocker::Tasks::Push do
                 .and_yield('progress-message-1')
                 .and_yield('progress-message-2'))
     expect($stdout)
-        .to(receive(:puts)
+        .to(receive(:print)
                 .with('progress-message-1'))
     expect($stdout)
-        .to(receive(:puts)
+        .to(receive(:print)
                 .with('progress-message-2'))
 
     Rake::Task['image:push'].invoke
   end
 
-  def stub_puts
-    allow_any_instance_of(Kernel).to(receive(:puts))
-    allow($stdout).to(receive(:puts))
-    allow($stderr).to(receive(:puts))
+  def stub_print
+    allow_any_instance_of(Kernel).to(receive(:print))
+    allow($stdout).to(receive(:print))
+    allow($stderr).to(receive(:print))
   end
 
   def stub_docker_authenticate

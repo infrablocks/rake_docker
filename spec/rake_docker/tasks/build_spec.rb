@@ -4,7 +4,7 @@ describe RakeDocker::Tasks::Build do
   include_context :rake
 
   before(:each) do
-    stub_puts
+    stub_print
     stub_docker_build
   end
 
@@ -179,7 +179,7 @@ describe RakeDocker::Tasks::Build do
     Rake::Task['image:build'].invoke
   end
 
-  it 'puts progress to stdout' do
+  it 'print progress to stdout' do
     define_task do |t|
       t.image_name = 'nginx'
       t.repository_name = 'my-org/nginx'
@@ -191,10 +191,10 @@ describe RakeDocker::Tasks::Build do
                 .and_yield('progress-message-1')
                 .and_yield('progress-message-2'))
     expect($stdout)
-        .to(receive(:puts)
+        .to(receive(:print)
                 .with('progress-message-1'))
     expect($stdout)
-        .to(receive(:puts)
+        .to(receive(:print)
                 .with('progress-message-2'))
 
     Rake::Task['image:build'].invoke
@@ -242,10 +242,10 @@ describe RakeDocker::Tasks::Build do
     expect(task.prerequisite_tasks).to(eq([]))
   end
 
-  def stub_puts
-    allow_any_instance_of(Kernel).to(receive(:puts))
-    allow($stdout).to(receive(:puts))
-    allow($stderr).to(receive(:puts))
+  def stub_print
+    allow_any_instance_of(Kernel).to(receive(:print))
+    allow($stdout).to(receive(:print))
+    allow($stderr).to(receive(:print))
   end
 
   def stub_docker_build

@@ -26,22 +26,22 @@ module DockerOutput
 
     if json['status']
       if json['id']
-        return json['id'] + ': ' + json['status']
+        return json['id'] + ': ' + json['status'] + "\n"
       else
-        return json['status']
+        return json['status'] + "\n"
       end
     end
 
     return line # Nothing else matches
   end
 
-  def self.puts(chunk)
+  def self.print(chunk)
     self.parse(chunk) do |text, is_error|
       if is_error
-        $stdout.puts text.red
+        $stdout.print text.red + "\n"
         raise text
       end
-      $stdout.puts text unless text.empty?
+      $stdout.print text unless text.empty?
     end
   end
 end

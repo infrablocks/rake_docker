@@ -266,6 +266,32 @@ describe RakeDocker::Tasks::All do
       end
     end
 
+    it 'passes a nil build args when none supplied' do
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:build_args=).with(nil))
+
+      define_tasks
+    end
+
+    it 'passes the provided build args when supplied' do
+      build_args = {
+          SOMETHING_IMPORTANT: 'the-value'
+      }
+      build_configurer = stubbed_build_configurer
+
+      expect(RakeDocker::Tasks::Build)
+          .to(receive(:new).and_yield(build_configurer))
+      expect(build_configurer)
+          .to(receive(:build_args=).with(build_args))
+
+      define_tasks do |t|
+        t.build_args = build_args
+      end
+    end
 
     it 'uses an empty array for argument names by default' do
       build_configurer = stubbed_build_configurer
@@ -503,7 +529,7 @@ describe RakeDocker::Tasks::All do
 
   def stubbed_build_configurer
     double_allowing(:name=, :argument_names=, :image_name=,
-                    :repository_name=, :work_directory=,
+                    :repository_name=, :work_directory=, :build_args=,
                     :credentials=, :prepare_task=)
   end
 

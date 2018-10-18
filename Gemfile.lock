@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rake_docker (0.15.0)
+    rake_docker (0.16.0)
       aws-sdk (~> 2.10)
       colored2 (~> 3.1)
       docker-api (~> 1.34)
@@ -73,4 +73,4 @@ DEPENDENCIES
   simplecov (~> 0.13)
 
 BUNDLED WITH
-   1.16.5
+   1.16.6

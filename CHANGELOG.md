@@ -1,3 +1,9 @@
+## 0.16.0 (October 18th, 2018)
+
+IMPROVEMENTS:
+
+* The `All` and `Build` tasks now support `build_args` being passed as a hash.
+
 ## 0.11.0 (January 9th, 2018)
 
 IMPROVEMENTS:

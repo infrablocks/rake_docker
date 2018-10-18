@@ -13,6 +13,8 @@ module RakeDocker
 
       parameter :credentials
 
+      parameter :build_args
+
       parameter :work_directory, :required => true
 
       parameter :prepare_task, :default => :prepare
@@ -41,9 +43,13 @@ module RakeDocker
 
           Docker.authenticate!(derived_credentials) if derived_credentials
 
+          options = {t: repository_name}
+          options = options.merge(
+              buildargs: JSON.generate(build_args)) if build_args
+
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),
-              {t: repository_name}) do |chunk|
+              options) do |chunk|
             DockerOutput.print chunk
           end
         end

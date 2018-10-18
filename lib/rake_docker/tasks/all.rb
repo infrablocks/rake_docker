@@ -26,6 +26,8 @@ module RakeDocker
 
       parameter :credentials
 
+      parameter :build_args
+
       parameter :clean_task_name, :default => :clean
       parameter :prepare_task_name, :default => :prepare
       parameter :build_task_name, :default => :build
@@ -65,6 +67,7 @@ module RakeDocker
           t.image_name = image_name
           t.repository_name = repository_name
           t.work_directory = work_directory
+          t.build_args = build_args
           t.credentials = credentials
           t.prepare_task = prepare_task_name
         end

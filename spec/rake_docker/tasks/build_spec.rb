@@ -179,6 +179,28 @@ describe RakeDocker::Tasks::Build do
     Rake::Task['image:build'].invoke
   end
 
+  it 'passes the specified build args when provided' do
+    define_task do |t|
+      t.image_name = 'nginx'
+      t.repository_name = 'my-org/nginx'
+      t.work_directory = 'build'
+
+      t.build_args = {
+          SOMETHING_IMPORTANT: "you-need-to-know-this"
+      }
+    end
+
+    expect(Docker::Image)
+        .to(receive(:build_from_dir)
+            .with('build/nginx', {
+                t: 'my-org/nginx',
+                buildargs: {
+                    SOMETHING_IMPORTANT: "you-need-to-know-this"
+                }}))
+
+    Rake::Task['image:build'].invoke
+  end
+
   it 'puts progress to stdout' do
     define_task do |t|
       t.image_name = 'nginx'

@@ -118,7 +118,7 @@ describe RakeDocker::Tasks::Build do
 
     expect(Docker)
         .to(receive(:authenticate!)
-                .with(credentials))
+            .with(credentials))
 
     Rake::Task['image:build'].invoke
   end
@@ -143,12 +143,12 @@ describe RakeDocker::Tasks::Build do
 
     expect(Docker)
         .to(receive(:authenticate!)
-                .with({
-                          username: 'thing',
-                          password: 'pass',
-                          email: 'user@userorg.com',
-                          serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
-                      }))
+            .with({
+                username: 'thing',
+                password: 'pass',
+                email: 'user@userorg.com',
+                serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
+            }))
 
     Rake::Task['image:build'].invoke('userorg')
   end
@@ -174,7 +174,7 @@ describe RakeDocker::Tasks::Build do
 
     expect(Docker::Image)
         .to(receive(:build_from_dir)
-                .with('build/nginx', {t: 'my-org/nginx'}))
+            .with('build/nginx', {t: 'my-org/nginx'}))
 
     Rake::Task['image:build'].invoke
   end
@@ -194,9 +194,8 @@ describe RakeDocker::Tasks::Build do
         .to(receive(:build_from_dir)
             .with('build/nginx', {
                 t: 'my-org/nginx',
-                buildargs: {
-                    SOMETHING_IMPORTANT: "you-need-to-know-this"
-                }}))
+                buildargs: "{\"SOMETHING_IMPORTANT\":\"you-need-to-know-this\"}"
+            }))
 
     Rake::Task['image:build'].invoke
   end
@@ -210,14 +209,14 @@ describe RakeDocker::Tasks::Build do
 
     allow(Docker::Image)
         .to(receive(:build_from_dir)
-                .and_yield('progress-message-1')
-                .and_yield('progress-message-2'))
+            .and_yield('progress-message-1')
+            .and_yield('progress-message-2'))
     expect($stdout)
         .to(receive(:puts)
-                .with('progress-message-1'))
+            .with('progress-message-1'))
     expect($stdout)
         .to(receive(:puts)
-                .with('progress-message-2'))
+            .with('progress-message-2'))
 
     Rake::Task['image:build'].invoke
   end
@@ -232,7 +231,7 @@ describe RakeDocker::Tasks::Build do
     build_task = Rake::Task['image:build']
 
     expect(build_task.prerequisite_tasks).to(eq([
-      Rake::Task['image:prepare']
+        Rake::Task['image:prepare']
     ]))
   end
 

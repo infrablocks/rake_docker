@@ -43,7 +43,8 @@ module RakeDocker
           Docker.authenticate!(derived_credentials) if derived_credentials
 
           options = {t: repository_name}
-          options = options.merge(buildargs: build_args) if build_args
+          options = options.merge(
+              buildargs: JSON.generate(build_args)) if build_args
 
           Docker::Image.build_from_dir(
               File.join(work_directory, image_name),

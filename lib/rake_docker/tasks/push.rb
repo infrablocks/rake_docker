@@ -49,7 +49,7 @@ module RakeDocker
           image = images.first
           derived_tags.each do |tag|
             image.push(nil, tag: tag) do |chunk|
-              $stdout.puts chunk
+              DockerOutput.print chunk
             end
           end
         end

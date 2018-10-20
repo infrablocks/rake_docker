@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'docker-api', '~> 1.34'
   spec.add_dependency 'aws-sdk', '~> 2.10'
+  spec.add_dependency 'colored2', '~> 3.1'
 
   spec.add_development_dependency 'bundler', '~> 1.14'
   spec.add_development_dependency 'rake', '~> 10.0'

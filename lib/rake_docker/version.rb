@@ -1,3 +1,3 @@
 module RakeDocker
-  VERSION = '0.20.0-pre.1'
+  VERSION = '0.20.0-pre.2'
 end

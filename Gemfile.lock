@@ -72,7 +72,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport (~> 5.2)
-  bundler (~> 1.17)
+  bundler (~> 1.16)
   gem-release (~> 2.0)
   memfs (~> 1.0)
   rake (~> 12.3)

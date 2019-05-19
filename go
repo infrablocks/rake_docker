@@ -24,11 +24,6 @@ if [[ "$skip_checks" = "no" ]]; then
         missing_dependency="yes"
     fi
 
-    if ! type bundler >/dev/null 2>&1; then
-        echo "This codebase requires Bundler."
-        missing_dependency="yes"
-    fi
-
     if [[ "$missing_dependency" = "yes" ]]; then
         echo "Please install missing dependencies to continue."
         exit 1
@@ -42,14 +37,14 @@ if [[ "$offline" = "no" ]]; then
     if [[ "$verbose" = "yes" ]]; then
         gem install --no-document bundler
     else
-        gem install --no-document bundler > /dev/null
+        gem install --no-document bundler --silent
     fi
 
     echo "Installing ruby dependencies."
     if [[ "$verbose" = "yes" ]]; then
         bundle install
     else
-        bundle install > /dev/null
+        bundle install --quiet
     fi
 fi
 

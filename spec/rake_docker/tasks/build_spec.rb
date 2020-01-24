@@ -236,7 +236,7 @@ describe RakeDocker::Tasks::Build do
     expect(task.prerequisite_tasks).to(include(Rake::Task['image:prep']))
   end
 
-  xit 'does not depend on prepare task when nil' do
+  it 'does not depend on prepare task when nil' do
     define_task(
         prepare_task_name: nil,
         image_name: 'nginx',

@@ -40,8 +40,8 @@ describe RakeDocker::TaskSets::All do
       work_directory = 'tmp'
 
       define_tasks(
-        image_name: image_name,
-        work_directory: work_directory)
+          image_name: image_name,
+          work_directory: work_directory)
 
       rake_task = Rake::Task["clean"]
 
@@ -135,9 +135,9 @@ describe RakeDocker::TaskSets::All do
       work_directory = 'tmp'
 
       define_tasks(
-        image_name: image_name,
-        repository_name: repository_name,
-        work_directory: work_directory)
+          image_name: image_name,
+          repository_name: repository_name,
+          work_directory: work_directory)
 
       rake_task = Rake::Task["build"]
 
@@ -239,10 +239,10 @@ describe RakeDocker::TaskSets::All do
       tags = ['latest']
 
       define_tasks(
-        image_name: image_name,
-        repository_name: repository_name,
-        repository_url: repository_url,
-        tags: tags)
+          image_name: image_name,
+          repository_name: repository_name,
+          repository_url: repository_url,
+          tags: tags)
 
       rake_task = Rake::Task["tag"]
 
@@ -288,9 +288,9 @@ describe RakeDocker::TaskSets::All do
       tags = ['latest']
 
       define_tasks(
-        image_name: image_name,
-        repository_url: repository_url,
-        tags: tags)
+          image_name: image_name,
+          repository_url: repository_url,
+          tags: tags)
 
       rake_task = Rake::Task["push"]
 
@@ -346,6 +346,56 @@ describe RakeDocker::TaskSets::All do
       rake_task = Rake::Task["push"]
 
       expect(rake_task.creator.argument_names).to(eq([:org_name]))
+    end
+  end
+
+  context 'publish task' do
+    it 'configures with the provided image name' do
+      image_name = 'apache'
+
+      define_tasks(image_name: image_name)
+
+      rake_task = Rake::Task["publish"]
+
+      expect(rake_task.creator.image_name).to(eq(image_name))
+    end
+
+    it 'uses a name of publish by default' do
+      define_tasks
+
+      expect(Rake::Task.task_defined?("publish")).to(be(true))
+    end
+
+    it 'uses the provided name when supplied' do
+      define_tasks(push_task_name: :publish_it_real_good)
+
+      expect(Rake::Task.task_defined?("publish_it_real_good")).to(be(true))
+    end
+
+    it 'passes other task names to publish' do
+      define_tasks
+
+      rake_task = Rake::Task["publish"]
+
+      expect(rake_task.creator.clean_task_name).to(be(:clean))
+      expect(rake_task.creator.build_task_name).to(be(:build))
+      expect(rake_task.creator.tag_task_name).to(be(:tag))
+      expect(rake_task.creator.push_task_name).to(be(:push))
+    end
+
+    it 'passes custom task names to publish' do
+      define_tasks(
+          clean_task_name: :clean_it_up,
+          build_task_name: :build_it_up,
+          tag_task_name: :tag_it_up,
+          push_task_name: :push_it_up)
+
+      rake_task = Rake::Task["publish"]
+
+      expect(rake_task.creator.clean_task_name).to(be(:clean_it_up))
+      expect(rake_task.creator.build_task_name).to(be(:build_it_up))
+      expect(rake_task.creator.tag_task_name).to(be(:tag_it_up))
+      expect(rake_task.creator.push_task_name).to(be(:push_it_up))
     end
   end
 end

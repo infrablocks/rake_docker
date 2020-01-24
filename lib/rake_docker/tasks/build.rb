@@ -24,7 +24,7 @@ module RakeDocker
 
       parameter :work_directory, :required => true
 
-      parameter :prepare_task_name, :default => :prepare
+      parameter :prepare_task_name, default: :prepare
 
       action do |t|
         Docker.authenticate!(t.credentials) if t.credentials

@@ -4,7 +4,7 @@ describe RakeDocker::Tasks::Prepare do
   include_context :rake
 
   before(:each) do
-    # stub_puts
+    stub_puts
   end
 
   it 'adds a prepare task in the namespace in which it is created' do

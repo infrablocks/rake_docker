@@ -30,12 +30,14 @@ module RakeDocker
       parameter :build_task_name, default: :build
       parameter :tag_task_name, default: :tag
       parameter :push_task_name, default: :push
+      parameter :publish_task_name, default: :publish
 
       task Tasks::Clean, name: ->(ts) { ts.clean_task_name }
       task Tasks::Prepare, name: ->(ts) { ts.prepare_task_name }
       task Tasks::Build, name: ->(ts) { ts.build_task_name }
       task Tasks::Tag, name: ->(ts) { ts.tag_task_name }
       task Tasks::Push, name: ->(ts) { ts.push_task_name }
+      task Tasks::Publish, name: ->(ts) { ts.publish_task_name }
     end
   end
 end

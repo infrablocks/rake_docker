@@ -8,96 +8,94 @@ describe RakeDocker::Tasks::Build do
     stub_docker_build
   end
 
-  def define_task(name = nil, options = {}, &block)
-    ns = options[:namespace] || :image
-    additional_tasks = options[:additional_tasks] || [:prepare]
+  def define_task(opts = {}, &block)
+    opts =
+        {namespace: :image, additional_tasks: [:prepare]}
+            .merge(opts)
 
-    namespace ns do
-      additional_tasks.each do |t|
+    namespace opts[:namespace] do
+      opts[:additional_tasks].each do |t|
         task t
       end
 
-      subject.new(*(name ? [name] : [])) do |t|
-        block.call(t) if block
-      end
+      subject.define(opts, &block)
     end
   end
 
   it 'adds a build task in the namespace in which it is created' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
-    expect(Rake::Task['image:build']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:build')).to(be(true))
   end
 
   it 'gives the build task a description' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
-    expect(rake.last_description).to(eq('Build nginx image'))
+    expect(Rake::Task["image:build"].full_comment)
+        .to(eq('Build nginx image'))
   end
 
   it 'allows the task name to be overridden' do
-    define_task(:construct) do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        name: :construct,
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
-    expect(Rake::Task['image:construct']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:construct')).to(be(true))
   end
 
   it 'allows multiple build tasks to be declared' do
-    define_task(nil, namespace: :image1) do |t|
-      t.image_name = 'image1'
-      t.repository_name = 'my-org/image1'
-      t.work_directory = 'build'
-    end
+    define_task(
+        namespace: :image1,
+        image_name: 'image1',
+        repository_name: 'my-org/image1',
+        work_directory: 'build')
 
-    define_task(nil, namespace: :image2) do |t|
-      t.image_name = 'image2'
-      t.repository_name = 'my-org/image2'
-      t.work_directory = 'build'
-    end
+    define_task(
+        namespace: :image2,
+        image_name: 'image2',
+        repository_name: 'my-org/image2',
+        work_directory: 'build')
 
-    image1_build = Rake::Task['image1:build']
-    image2_build = Rake::Task['image2:build']
-
-    expect(image1_build).not_to be_nil
-    expect(image2_build).not_to be_nil
+    expect(Rake::Task.task_defined?('image1:build')).to(be(true))
+    expect(Rake::Task.task_defined?('image2:build')).to(be(true))
   end
 
   it 'fails if no image name is provided' do
+    define_task(
+        repository_name: 'my-org/thing',
+        work_directory: 'build')
+
     expect {
-      define_task do |t|
-        t.repository_name = 'my-org/thing'
-        t.work_directory = 'build'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["image:build"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'fails if no repository name is provided' do
+    define_task(
+        image_name: 'thing',
+        work_directory: 'build')
+
     expect {
-      define_task do |t|
-        t.image_name = 'thing'
-        t.work_directory = 'build'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["image:build"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'fails if no work directory is provided' do
+    define_task(
+        image_name: 'thing',
+        repository_name: 'my-org/thing')
+
     expect {
-      define_task do |t|
-        t.image_name = 'thing'
-        t.repository_name = 'my-org/thing'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["image:build"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'authenticates using the provided credentials when present' do
@@ -108,13 +106,11 @@ describe RakeDocker::Tasks::Build do
         serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com'
     }
 
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/thing'
-      t.work_directory = 'build'
-
-      t.credentials = credentials
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/thing',
+        work_directory: 'build',
+        credentials: credentials)
 
     expect(Docker)
         .to(receive(:authenticate!)
@@ -124,21 +120,18 @@ describe RakeDocker::Tasks::Build do
   end
 
   it 'authenticates using the provided credentials factory when present' do
-    define_task do |t|
-      t.argument_names = [:org_name]
-
-      t.image_name = 'thing'
-      t.repository_name = 'my-org/thing'
-      t.work_directory = 'build'
-
-      t.credentials = lambda do |args, params|
-        {
-            username: "#{params.image_name}",
-            password: 'pass',
-            email: "user@#{args.org_name}.com",
-            serveraddress: "123.dkr.ecr.eu-west-2.amazonaws.com/#{params.repository_name}"
-        }
-      end
+    define_task(
+        argument_names: [:org_name],
+        image_name: 'thing',
+        repository_name: 'my-org/thing',
+        work_directory: 'build') do |t, args|
+      t.credentials = {
+          username: "#{t.image_name}",
+          password: 'pass',
+          email: "user@#{args.org_name}.com",
+          serveraddress:
+              "123.dkr.ecr.eu-west-2.amazonaws.com/#{t.repository_name}"
+      }
     end
 
     expect(Docker)
@@ -147,18 +140,18 @@ describe RakeDocker::Tasks::Build do
                 username: 'thing',
                 password: 'pass',
                 email: 'user@userorg.com',
-                serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
+                serveraddress:
+                    '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
             }))
 
     Rake::Task['image:build'].invoke('userorg')
   end
 
   it 'does not authenticate when no credentials are provided' do
-    define_task do |t|
-      t.image_name = 'thing'
-      t.repository_name = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'thing',
+        repository_name: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/thing',
+        work_directory: 'build')
 
     expect(Docker).not_to(receive(:authenticate!))
 
@@ -166,11 +159,10 @@ describe RakeDocker::Tasks::Build do
   end
 
   it 'builds the image in the correct work directory tagging with the repository name' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
     expect(Docker::Image)
         .to(receive(:build_from_dir)
@@ -180,15 +172,13 @@ describe RakeDocker::Tasks::Build do
   end
 
   it 'passes the specified build args when provided' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-
-      t.build_args = {
-          SOMETHING_IMPORTANT: "you-need-to-know-this"
-      }
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build',
+        build_args: {
+            SOMETHING_IMPORTANT: "you-need-to-know-this"
+        })
 
     expect(Docker::Image)
         .to(receive(:build_from_dir)
@@ -201,11 +191,10 @@ describe RakeDocker::Tasks::Build do
   end
 
   it 'print progress to stdout' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
     allow(Docker::Image)
         .to(receive(:build_from_dir)
@@ -213,20 +202,19 @@ describe RakeDocker::Tasks::Build do
             .and_yield('progress-message-2'))
     expect($stdout)
         .to(receive(:print)
-                .with('progress-message-1'))
+            .with('progress-message-1'))
     expect($stdout)
         .to(receive(:print)
-                .with('progress-message-2'))
+            .with('progress-message-2'))
 
     Rake::Task['image:build'].invoke
   end
 
   it 'depends on the prepare task by default' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-    end
+    define_task(
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
     build_task = Rake::Task['image:build']
 
@@ -236,27 +224,24 @@ describe RakeDocker::Tasks::Build do
   end
 
   it 'allows the prepare task to be overridden' do
-    define_task(nil, additional_tasks: [:prep]) do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-
-      t.prepare_task = :prep
-    end
+    define_task(
+        additional_tasks: [:prep],
+        prepare_task_name: :prep,
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
     task = Rake::Task['image:build']
 
     expect(task.prerequisite_tasks).to(include(Rake::Task['image:prep']))
   end
 
-  it 'does not depend on prepare task when nil' do
-    define_task do |t|
-      t.image_name = 'nginx'
-      t.repository_name = 'my-org/nginx'
-      t.work_directory = 'build'
-
-      t.prepare_task = nil
-    end
+  xit 'does not depend on prepare task when nil' do
+    define_task(
+        prepare_task_name: nil,
+        image_name: 'nginx',
+        repository_name: 'my-org/nginx',
+        work_directory: 'build')
 
     task = Rake::Task['image:build']
 

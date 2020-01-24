@@ -6,64 +6,57 @@ describe RakeDocker::Tasks::Clean do
 
   it 'adds a clean task in the namespace in which it is created' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(Rake::Task['image:clean']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:clean')).to(be(true))
   end
 
   it 'gives the clean task a description' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(rake.last_description).to(eq('Clean nginx image directory'))
+    expect(Rake::Task["image:clean"].full_comment)
+        .to(eq('Clean nginx image directory'))
   end
 
   it 'allows the task name to be overridden' do
     namespace :image do
-      subject.new(:tidy_up) do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          name: :tidy_up,
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(Rake::Task['image:tidy_up']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:tidy_up')).to(be(true))
   end
 
   it 'allows multiple clean tasks to be declared' do
     namespace :image1 do
-      subject.new do |t|
-        t.image_name = 'image1'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'image1',
+          work_directory: 'build')
     end
 
     namespace :image2 do
-      subject.new do |t|
-        t.image_name = 'image2'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'image2',
+          work_directory: 'build')
     end
 
-    image1_clean = Rake::Task['image1:clean']
-    image2_clean = Rake::Task['image2:clean']
-
-    expect(image1_clean).not_to be_nil
-    expect(image2_clean).not_to be_nil
+    expect(Rake::Task.task_defined?('image1:clean')).to(be(true))
+    expect(Rake::Task.task_defined?('image2:clean')).to(be(true))
   end
 
   it 'recursively removes the image build path' do
-    subject.new do |t|
-      t.image_name = 'nginx'
-      t.work_directory = 'build'
-    end
+    subject.define(
+        image_name: 'nginx',
+        work_directory: 'build')
 
     expect_any_instance_of(subject).to(receive(:rm_rf).with('build/nginx'))
 
@@ -71,18 +64,22 @@ describe RakeDocker::Tasks::Clean do
   end
 
   it 'fails if no image name is provided' do
+    subject.define(work_directory: 'build')
+
+    allow(subject).to(receive(:rm_rf))
+
     expect {
-      subject.new do |t|
-        t.work_directory = 'build'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["clean"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'fails if no work directory is provided' do
+    subject.define(image_name: 'nginx')
+
+    allow(subject).to(receive(:rm_rf))
+
     expect {
-      subject.new do |t|
-        t.image_name = 'nginx'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["clean"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 end

@@ -21,15 +21,16 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 2.3.8'
+  spec.required_ruby_version = '>= 2.6'
 
   spec.add_dependency 'docker-api', '~> 1.34'
+  spec.add_dependency 'rake_factory', '~> 0.15'
   spec.add_dependency 'aws-sdk-ecr', '~> 1.2'
   spec.add_dependency 'colored2', '~> 3.1'
 
-  spec.add_development_dependency 'bundler', '~> 1.16'
-  spec.add_development_dependency 'rake', '~> 12.3'
-  spec.add_development_dependency 'rspec', '~> 3.8'
+  spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rspec', '~> 3.9'
   spec.add_development_dependency 'gem-release', '~> 2.0'
   spec.add_development_dependency 'activesupport', '~> 5.2'
   spec.add_development_dependency 'memfs', '~> 1.0'

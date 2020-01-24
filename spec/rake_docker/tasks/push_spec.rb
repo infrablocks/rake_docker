@@ -11,79 +11,65 @@ describe RakeDocker::Tasks::Push do
 
   it 'adds a push task in the namespace in which it is created' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          image_name: 'nginx',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+          tags: ['latest'])
     end
 
-    expect(Rake::Task['image:push']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:push')).to(be(true))
   end
 
   it 'gives the push task a description' do
-    subject.new do |t|
-      t.image_name = 'nginx'
-      t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+    subject.define(
+        image_name: 'nginx',
+        repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+        tags: ['latest'])
 
-      t.tags = ['latest']
-    end
-
-    expect(rake.last_description).to(eq('Push nginx image to repository'))
+    expect(Rake::Task["push"].full_comment)
+        .to(eq('Push nginx image to repository'))
   end
 
   it 'allows the task name to be overridden' do
     namespace :image do
-      subject.new(:push_to_ecr) do |t|
-        t.image_name = 'nginx'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          name: :push_to_ecr,
+          image_name: 'nginx',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+          tags: ['latest'])
     end
 
-    expect(Rake::Task['image:push_to_ecr']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:push_to_ecr')).to(be(true))
   end
 
   it 'allows multiple push tasks to be declared' do
     namespace :image1 do
-      subject.new do |t|
-        t.image_name = 'image1'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image1'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          image_name: 'image1',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image1',
+          tags: ['latest'])
     end
 
     namespace :image2 do
-      subject.new do |t|
-        t.image_name = 'image2'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          image_name: 'image2',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2',
+          tags: ['latest'])
     end
 
-    image1_push = Rake::Task['image1:push']
-    image2_push = Rake::Task['image2:push']
-
-    expect(image1_push).not_to be_nil
-    expect(image2_push).not_to be_nil
+    expect(Rake::Task.task_defined?('image1:push')).to(be(true))
+    expect(Rake::Task.task_defined?('image2:push')).to(be(true))
   end
 
   it 'configures the task with the provided arguments if specified' do
     argument_names = [:deployment_identifier, :region]
 
     namespace :image do
-      subject.new do |t|
-        t.argument_names = argument_names
-
-        t.image_name = 'image2'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          argument_names: argument_names,
+          image_name: 'image2',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2',
+          tags: ['latest'])
     end
 
     expect(Rake::Task['image:push'].arg_names)
@@ -91,21 +77,23 @@ describe RakeDocker::Tasks::Push do
   end
 
   it 'fails if no image name is provided' do
+    subject.define(
+        repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+        tags: ['latest'])
+
     expect {
-      subject.new do |t|
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-        t.tags = ['latest']
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["push"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'fails if no repository url is provided' do
+    subject.define(
+        image_name: 'thing',
+        tags: ['latest'])
+
     expect {
-      subject.new do |t|
-        t.image_name = 'thing'
-        t.tags = ['latest']
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["push"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'authenticates using the provided credentials when present' do
@@ -117,63 +105,57 @@ describe RakeDocker::Tasks::Push do
     }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+      subject.define(
+          image_name: 'nginx',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
 
-        t.credentials = credentials
-        t.tags = ['latest']
-      end
+          credentials: credentials,
+          tags: ['latest'])
     end
 
     expect(Docker)
         .to(receive(:authenticate!)
-                .with(credentials))
+            .with(credentials))
 
     Rake::Task['image:push'].invoke
   end
 
   it 'authenticates using the provided credentials factory when present' do
     namespace :image do
-      subject.new do |t|
-        t.argument_names = [:org_name]
+      subject.define(
+          argument_names: [:org_name],
+          image_name: 'nginx',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+          tags: ['latest']
+      ) do |t, args|
 
-        t.image_name = 'nginx'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-        t.credentials = lambda do |args, params|
-          {
-              username: "#{params.image_name}",
-              password: 'pass',
-              email: "user@#{args.org_name}.com",
-              serveraddress: "#{params.repository_url}"
-          }
-        end
-
-        t.tags = ['latest']
+        t.credentials = {
+            username: "#{t.image_name}",
+            password: 'pass',
+            email: "user@#{args.org_name}.com",
+            serveraddress: "#{t.repository_url}"
+        }
       end
     end
 
     expect(Docker)
         .to(receive(:authenticate!)
-                .with({
-                          username: 'nginx',
-                          password: 'pass',
-                          email: 'user@userorg.com',
-                          serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-                      }))
+            .with({
+                username: 'nginx',
+                password: 'pass',
+                email: 'user@userorg.com',
+                serveraddress: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
+            }))
 
     Rake::Task['image:push'].invoke('userorg')
   end
 
   it 'does not authenticate when no credentials are provided' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          image_name: 'nginx',
+          repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
+          tags: ['latest'])
     end
 
     expect(Docker).not_to(receive(:authenticate!))
@@ -185,19 +167,17 @@ describe RakeDocker::Tasks::Push do
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = repository_url
-
-        t.tags = ['latest', '1.2.3']
-      end
+      subject.define(
+          image_name: 'nginx',
+          repository_url: repository_url,
+          tags: ['latest', '1.2.3'])
     end
 
     image = double('image')
     allow(Docker::Image)
         .to(receive(:all)
-                .with(filter: repository_url)
-                .and_return([image]))
+            .with(filter: repository_url)
+            .and_return([image]))
     expect(image)
         .to(receive(:push).with(nil, tag: 'latest'))
     expect(image)
@@ -210,23 +190,20 @@ describe RakeDocker::Tasks::Push do
     expected_repository_url = "123.dkr.myorg/nginx"
 
     namespace :image do
-      subject.new do |t|
-        t.argument_names = [:org_name]
-
-        t.image_name = 'nginx'
-        t.repository_url = lambda do |args, params|
-          "123.dkr.#{args.org_name}/#{params.image_name}"
-        end
-
-        t.tags = ['latest']
+      subject.define(
+          argument_names: [:org_name],
+          image_name: 'nginx',
+          tags: ['latest']
+      ) do |t, args|
+        t.repository_url = "123.dkr.#{args.org_name}/#{t.image_name}"
       end
     end
 
     image = double('image')
     allow(Docker::Image)
         .to(receive(:all)
-                .with(filter: expected_repository_url)
-                .and_return([image]))
+            .with(filter: expected_repository_url)
+            .and_return([image]))
     expect(image)
         .to(receive(:push).with(nil, tag: 'latest'))
 
@@ -237,23 +214,20 @@ describe RakeDocker::Tasks::Push do
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
     namespace :image do
-      subject.new do |t|
-        t.argument_names = [:org_name]
-
-        t.image_name = 'nginx'
-        t.repository_url = repository_url
-
-        t.tags = lambda do |args, params|
-          ["#{params.image_name}_#{args.org_name}"]
-        end
+      subject.define(
+          argument_names: [:org_name],
+          image_name: 'nginx',
+          repository_url: repository_url
+      ) do |t, args|
+        t.tags = ["#{t.image_name}_#{args.org_name}"]
       end
     end
 
     image = double('image')
     allow(Docker::Image)
         .to(receive(:all)
-                .with(filter: repository_url)
-                .and_return([image]))
+            .with(filter: repository_url)
+            .and_return([image]))
     expect(image)
         .to(receive(:push).with(nil, tag: 'nginx_myorg'))
 
@@ -265,54 +239,50 @@ describe RakeDocker::Tasks::Push do
     tag = 'really-important-tag'
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = repository_url
-
-        t.tags = [tag]
-      end
+      subject.define(
+          image_name: 'nginx',
+          repository_url: repository_url,
+          tags: [tag])
     end
 
     expect(Docker::Image)
         .to(receive(:all)
-                .with(filter: repository_url)
-                .and_return([]))
+            .with(filter: repository_url)
+            .and_return([]))
 
     expect {
       Rake::Task['image:push'].invoke
     }.to(raise_error(
-             RakeDocker::ImageNotFound,
-             'No image found for repository: ' +
-                 '\'123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx\''))
+        RakeDocker::ImageNotFound,
+        'No image found for repository: ' +
+            '\'123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx\''))
   end
 
   it 'print push progress to stdout' do
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.repository_url = repository_url
-
-        t.tags = ['latest']
-      end
+      subject.define(
+          image_name: 'nginx',
+          repository_url: repository_url,
+          tags: ['latest'])
     end
 
     image = double('image')
     allow(Docker::Image)
         .to(receive(:all)
-                .with(filter: repository_url)
-                .and_return([image]))
+            .with(filter: repository_url)
+            .and_return([image]))
     expect(image)
         .to(receive(:push).with(nil, tag: 'latest')
-                .and_yield('progress-message-1')
-                .and_yield('progress-message-2'))
+            .and_yield('progress-message-1')
+            .and_yield('progress-message-2'))
     expect($stdout)
         .to(receive(:print)
-                .with('progress-message-1'))
+            .with('progress-message-1'))
     expect($stdout)
         .to(receive(:print)
-                .with('progress-message-2'))
+            .with('progress-message-2'))
 
     Rake::Task['image:push'].invoke
   end

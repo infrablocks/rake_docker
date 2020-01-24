@@ -1,12 +1,13 @@
+require 'rake_factory'
 require 'docker'
-require 'ostruct'
-require_relative '../tasklib'
 
 module RakeDocker
   module Tasks
-    class Push < TaskLib
-      parameter :name, :default => :push
-      parameter :argument_names, :default => []
+    class Push < RakeFactory::Task
+      default_name :push
+      default_description ->(t) {
+        "Push #{t.image_name} image to repository"
+      }
 
       parameter :image_name, :required => true
       parameter :repository_url, :required => true
@@ -14,43 +15,19 @@ module RakeDocker
       parameter :credentials
       parameter :tags, :required => true
 
-      def process_arguments(args)
-        self.name = args[0] if args[0]
-      end
+      action do |t|
+        Docker.authenticate!(t.credentials) if t.credentials
 
-      def define
-        desc "Push #{image_name} image to repository"
-        task name, argument_names do |_, args|
-          params = OpenStruct.new(
-              image_name: image_name,
-              repository_url: repository_url,
-              credentials: credentials,
-              tag: tags
-          )
+        images = Docker::Image.all(filter: t.repository_url)
+        if images.empty?
+          raise ImageNotFound,
+              "No image found for repository: '#{t.repository_url}'"
+        end
 
-          derived_repository_url = repository_url.respond_to?(:call) ?
-              repository_url.call(*[args, params].slice(0, repository_url.arity)) :
-              repository_url
-          derived_credentials = credentials.respond_to?(:call) ?
-              credentials.call(*[args, params].slice(0, credentials.arity)) :
-              credentials
-          derived_tags = tags.respond_to?(:call) ?
-              tags.call(*[args, params].slice(0, tags.arity)) :
-              tags
-
-          Docker.authenticate!(derived_credentials) if derived_credentials
-
-          images = Docker::Image.all(filter: derived_repository_url)
-          if images.empty?
-            raise RakeDocker::ImageNotFound,
-                  "No image found for repository: '#{derived_repository_url}'"
-          end
-
-          image = images.first
-          derived_tags.each do |tag|
-            image.push(nil, tag: tag) do |chunk|
-              DockerOutput.print chunk
-            end
+        image = images.first
+        t.tags.each do |tag|
+          image.push(nil, tag: tag) do |chunk|
+            Output.print chunk
           end
         end
       end

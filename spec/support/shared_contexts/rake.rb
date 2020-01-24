@@ -4,6 +4,14 @@ require 'active_support'
 require 'active_support/core_ext/string/inflections.rb'
 require 'memfs'
 
+module MemFs
+  class Dir
+    def self.children(dirname, _)
+      self.entries(dirname) - [".", ".."]
+    end
+  end
+end
+
 shared_context :rake do
   include ::Rake::DSL if defined?(::Rake::DSL)
 

@@ -1,22 +1,18 @@
-require_relative '../tasklib'
+require 'rake_factory'
 
 module RakeDocker
   module Tasks
-    class Clean < TaskLib
-      parameter :name, :default => :clean
+    class Clean < RakeFactory::Task
+      default_name :clean
+      default_description ->(t) {
+        "Clean #{t.image_name} image directory"
+      }
 
       parameter :image_name, :required => true
       parameter :work_directory, :required => true
 
-      def process_arguments(args)
-        self.name = args[0] if args[0]
-      end
-
-      def define
-        desc "Clean #{image_name} image directory"
-        task name do
-          rm_rf File.join(work_directory, image_name)
-        end
+      action do |t|
+        rm_rf File.join(t.work_directory, t.image_name)
       end
     end
   end

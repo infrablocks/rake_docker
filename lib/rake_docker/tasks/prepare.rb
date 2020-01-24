@@ -1,9 +1,12 @@
-require_relative '../tasklib'
+require 'rake_factory'
 
 module RakeDocker
   module Tasks
-    class Prepare < TaskLib
-      parameter :name, :default => :prepare
+    class Prepare < RakeFactory::Task
+      default_name :prepare
+      default_description ->(t) {
+        "Prepare for build of #{t.image_name} image"
+      }
 
       parameter :image_name, :required => true
 
@@ -12,39 +15,32 @@ module RakeDocker
       parameter :copy_spec, :default => []
       parameter :create_spec, :default => []
 
-      def process_arguments(args)
-        self.name = args[0] if args[0]
-      end
+      action do |t|
+        image_directory = File.join(t.work_directory, t.image_name)
+        FileUtils.mkdir_p image_directory
 
-      def define
-        desc "Prepare for build of #{image_name} image"
-        task name do
-          image_directory = File.join(work_directory, image_name)
-          mkdir_p image_directory
+        t.copy_spec.each do |entry|
+          from = entry.is_a?(Hash) ? entry[:from] : entry
+          to = entry.is_a?(Hash) ?
+              File.join(image_directory, entry[:to]) :
+              image_directory
 
-          copy_spec.each do |entry|
-            from = entry.is_a?(Hash) ? entry[:from] : entry
-            to = entry.is_a?(Hash) ?
-                File.join(image_directory, entry[:to]) :
-                image_directory
-
-            if File.directory?(from)
-              mkdir_p to
-              cp_r from, to
-            else
-              cp from, to
-            end
+          if File.directory?(from)
+            FileUtils.mkdir_p to
+            FileUtils.cp_r from, to
+          else
+            FileUtils.cp from, to
           end
+        end
 
-          create_spec.each do |entry|
-            content = entry[:content]
-            to = entry[:to]
-            file = File.join(image_directory, to)
+        t.create_spec.each do |entry|
+          content = entry[:content]
+          to = entry[:to]
+          file = File.join(image_directory, to)
 
-            mkdir_p(File.dirname(file))
-            File.open(file, 'w') do |f|
-              f.write(content)
-            end
+          FileUtils.mkdir_p(File.dirname(file))
+          File.open(file, 'w') do |f|
+            f.write(content)
           end
         end
       end

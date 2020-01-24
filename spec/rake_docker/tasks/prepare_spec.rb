@@ -4,86 +4,79 @@ describe RakeDocker::Tasks::Prepare do
   include_context :rake
 
   before(:each) do
-    stub_puts
+    # stub_puts
   end
 
   it 'adds a prepare task in the namespace in which it is created' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(Rake::Task['image:prepare']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:prepare')).to(be(true))
   end
 
   it 'gives the prepare task a description' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(rake.last_description).to(eq('Prepare for build of nginx image'))
+    expect(Rake::Task["image:prepare"].full_comment)
+        .to(eq('Prepare for build of nginx image'))
   end
 
   it 'allows the task name to be overridden' do
     namespace :image do
-      subject.new(:assemble) do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          name: :assemble,
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
-    expect(Rake::Task['image:assemble']).not_to be_nil
+    expect(Rake::Task.task_defined?('image:assemble')).to(be(true))
   end
 
   it 'allows multiple prepare tasks to be declared' do
     namespace :image1 do
-      subject.new do |t|
-        t.image_name = 'image1'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'image1',
+          work_directory: 'build')
     end
 
     namespace :image2 do
-      subject.new do |t|
-        t.image_name = 'image2'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'image2',
+          work_directory: 'build')
     end
 
-    image1_prepare = Rake::Task['image1:prepare']
-    image2_prepare = Rake::Task['image2:prepare']
-
-    expect(image1_prepare).not_to be_nil
-    expect(image2_prepare).not_to be_nil
+    expect(Rake::Task.task_defined?('image1:prepare')).to(be(true))
+    expect(Rake::Task.task_defined?('image2:prepare')).to(be(true))
   end
 
   it 'fails if no image name is provided' do
+    subject.define(work_directory: 'build')
+
     expect {
-      subject.new do |t|
-        t.work_directory = 'build'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["prepare"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'fails if no work directory is provided' do
+    subject.define(image_name: 'thing')
+
     expect {
-      subject.new do |t|
-        t.image_name = 'thing'
-      end
-    }.to raise_error(RakeDocker::RequiredParameterUnset)
+      Rake::Task["prepare"].invoke
+    }.to raise_error(RakeFactory::RequiredParameterUnset)
   end
 
   it 'recursively makes the build directory' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build')
     end
 
     Rake::Task['image:prepare'].invoke
@@ -96,12 +89,10 @@ describe RakeDocker::Tasks::Prepare do
     File.open('file2.rb', 'w') { |f| f.write('file2') }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.copy_spec = ['file1.txt', 'file2.rb']
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          copy_spec: ['file1.txt', 'file2.rb'])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -111,19 +102,18 @@ describe RakeDocker::Tasks::Prepare do
   end
 
   it 'renames files on copy' do
-    File.open('file1.txt', 'w') {|f| f.write('file1')}
-    File.open('file2.rb', 'w') {|f| f.write('file2')}
+    File.open('file1.txt', 'w') { |f| f.write('file1') }
+    File.open('file2.rb', 'w') { |f| f.write('file2') }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
 
-        t.copy_spec = [
-            {from: 'file1.txt', to: 'copied_file1.txt'},
-            {from: 'file2.rb', to: 'copied_file2.rb'}
-        ]
-      end
+          copy_spec: [
+              {from: 'file1.txt', to: 'copied_file1.txt'},
+              {from: 'file2.rb', to: 'copied_file2.rb'}
+          ])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -134,16 +124,14 @@ describe RakeDocker::Tasks::Prepare do
 
   it 'copies full directory when the source is a directory' do
     FileUtils.mkdir_p('source')
-    File.open('source/file1.txt', 'w') {|f| f.write('file1')}
-    File.open('source/file2.rb', 'w') {|f| f.write('file2')}
+    File.open('source/file1.txt', 'w') { |f| f.write('file1') }
+    File.open('source/file2.rb', 'w') { |f| f.write('file2') }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.copy_spec = ['source']
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          copy_spec: ['source'])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -154,16 +142,14 @@ describe RakeDocker::Tasks::Prepare do
 
   it 'copies directory contents when the source refers to directory contents' do
     FileUtils.mkdir_p('source')
-    File.open('source/file1.txt', 'w') {|f| f.write('file1')}
-    File.open('source/file2.rb', 'w') {|f| f.write('file2')}
+    File.open('source/file1.txt', 'w') { |f| f.write('file1') }
+    File.open('source/file2.rb', 'w') { |f| f.write('file2') }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.copy_spec = ['source/.']
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          copy_spec: ['source/.'])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -174,16 +160,14 @@ describe RakeDocker::Tasks::Prepare do
 
   it 'creates and copies into a destination directory' do
     FileUtils.mkdir_p('source')
-    File.open('source/file1.txt', 'w') {|f| f.write('file1')}
-    File.open('source/file2.rb', 'w') {|f| f.write('file2')}
+    File.open('source/file1.txt', 'w') { |f| f.write('file1') }
+    File.open('source/file2.rb', 'w') { |f| f.write('file2') }
 
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.copy_spec = [{from: 'source/.', to: 'the/destination'}]
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          copy_spec: [{from: 'source/.', to: 'the/destination'}])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -194,14 +178,12 @@ describe RakeDocker::Tasks::Prepare do
 
   it 'creates file from content' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.create_spec = [
-            {content: 'some-content', to: 'some-file.txt'}
-        ]
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          create_spec: [
+              {content: 'some-content', to: 'some-file.txt'}
+          ])
     end
 
     Rake::Task['image:prepare'].invoke
@@ -212,14 +194,12 @@ describe RakeDocker::Tasks::Prepare do
 
   it 'creates destination directory when specified' do
     namespace :image do
-      subject.new do |t|
-        t.image_name = 'nginx'
-        t.work_directory = 'build'
-
-        t.create_spec = [
-            {content: 'some-content', to: 'some-directory/some-file.txt'}
-        ]
-      end
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          create_spec: [
+              {content: 'some-content', to: 'some-directory/some-file.txt'}
+          ])
     end
 
     Rake::Task['image:prepare'].invoke

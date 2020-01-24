@@ -1,12 +1,19 @@
+require 'rake_factory'
 require 'docker'
-require_relative '../tasklib'
-require_relative '../../docker_output'
+
+require_relative '../output'
 
 module RakeDocker
   module Tasks
-    class Build < TaskLib
-      parameter :name, :default => :build
-      parameter :argument_names, :default => []
+    class Build < RakeFactory::Task
+      default_name :build
+      default_description ->(t) { "Build #{t.image_name} image" }
+      default_prerequisites ->(t) {
+        t.prepare_task_name ?
+            [Rake.application.current_scope
+                .path_with_task_name(t.prepare_task_name)] :
+            []
+      }
 
       parameter :image_name, :required => true
       parameter :repository_name, :required => true
@@ -17,48 +24,21 @@ module RakeDocker
 
       parameter :work_directory, :required => true
 
-      parameter :prepare_task, :default => :prepare
+      parameter :prepare_task_name, :default => :prepare
 
-      def process_arguments(args)
-        self.name = args[0] if args[0]
-      end
+      action do |t|
+        Docker.authenticate!(t.credentials) if t.credentials
 
-      def define
-        prerequisites = prepare_task ?
-            [scoped_task_name(prepare_task)] :
-            []
+        options = {t: t.repository_name}
+        options = options.merge(
+            buildargs: JSON.generate(t.build_args)) if t.build_args
 
-        desc "Build #{image_name} image"
-        task name, argument_names => prerequisites do |_, args|
-          params = OpenStruct.new(
-              image_name: image_name,
-              repository_name: repository_name,
-              credentials: credentials,
-              work_directory: work_directory
-          )
-
-          derived_credentials = credentials.respond_to?(:call) ?
-              credentials.call(*[args, params].slice(0, credentials.arity)) :
-              credentials
-
-          Docker.authenticate!(derived_credentials) if derived_credentials
-
-          options = {t: repository_name}
-          options = options.merge(
-              buildargs: JSON.generate(build_args)) if build_args
-
-          Docker::Image.build_from_dir(
-              File.join(work_directory, image_name),
-              options) do |chunk|
-            DockerOutput.print chunk
-          end
+        Docker::Image.build_from_dir(
+            File.join(t.work_directory, t.image_name),
+            options
+        ) do |chunk|
+          Output.print chunk
         end
-      end
-
-      private
-
-      def scoped_task_name(task_name)
-        Rake.application.current_scope.path_with_task_name(task_name)
       end
     end
   end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe DockerOutput do
+RSpec.describe RakeDocker::Output do
   before(:each) do
     stub_prints
   end
@@ -10,7 +10,7 @@ RSpec.describe DockerOutput do
 
     expect($stdout).to(receive(:print).with(chunk))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'is handles multiline' do
@@ -23,7 +23,7 @@ line 2
     expect($stdout).to(receive(:print).with("line 1\n"))
     expect($stdout).to(receive(:print).with("line 2\n"))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'skips progress status' do
@@ -31,7 +31,7 @@ line 2
 
     expect($stdout).not_to(receive(:print))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'skips progress aux' do
@@ -39,18 +39,18 @@ line 2
 
     expect($stdout).not_to(receive(:print))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'detects an error' do
     chunk = <<-JSON
 {"errorDetail":{"message":"name unknown: The repository with name 'test-repo' does not exist in the registry with id '123456780102'"},"error":"name unknown: The repository with name 'test-repo' does not exist in the registry with id '123456780102'"}
-JSON
+    JSON
 
     expect($stdout).to(receive(:print).with("name unknown: The repository with name 'test-repo' does not exist in the registry with id '123456780102'".red + "\n"))
 
-	expect {
-      DockerOutput.print(chunk)
+    expect {
+      RakeDocker::Output.print(chunk)
     }.to raise_error(RuntimeError, "name unknown: The repository with name 'test-repo' does not exist in the registry with id '123456780102'")
   end
 
@@ -59,19 +59,19 @@ JSON
 
     expect($stdout).to(receive(:print).with('Step 1/8 : FROM openjdk:8-jre'))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'parses multiple stream chunks' do
     chunk = <<-JSON
 {"stream":"Step 1/8 : FROM openjdk:8-jre"}
 {"stream":"\\n"}
-JSON
+    JSON
 
     expect($stdout).to(receive(:print).with('Step 1/8 : FROM openjdk:8-jre'))
     expect($stdout).to(receive(:print).with("\n"))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'parses status with id' do
@@ -79,7 +79,7 @@ JSON
 
     expect($stdout).to(receive(:print).with("1290813abd9d: Waiting\n"))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'parses status without id' do
@@ -87,7 +87,7 @@ JSON
 
     expect($stdout).to(receive(:print).with("Status: Downloaded newer image for openjdk:8-jre\n"))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   it 'passes unrecognized JSON' do
@@ -95,7 +95,7 @@ JSON
 
     expect($stdout).to(receive(:print).with(chunk))
 
-    DockerOutput.print(chunk)
+    RakeDocker::Output.print(chunk)
   end
 
   def stub_prints

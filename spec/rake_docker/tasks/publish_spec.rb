@@ -93,9 +93,7 @@ describe RakeDocker::Tasks::Publish do
 
     namespace :image do
       subject.define(
-          clean_task_name: ->(t) {
-            t.scope.path_with_task_name(:clean_it)
-          },
+          clean_task_name: :clean_it,
           argument_names: [:thing1, :thing2])
     end
 
@@ -123,9 +121,7 @@ describe RakeDocker::Tasks::Publish do
 
     namespace :image do
       subject.define(
-          build_task_name: ->(t) {
-            t.scope.path_with_task_name(:build_it)
-          },
+          build_task_name: :build_it,
           argument_names: [:thing1, :thing2])
     end
 
@@ -153,9 +149,7 @@ describe RakeDocker::Tasks::Publish do
 
     namespace :image do
       subject.define(
-          tag_task_name: ->(t) {
-            t.scope.path_with_task_name(:tag_it)
-          },
+          tag_task_name: :tag_it,
           argument_names: [:thing1, :thing2])
     end
 
@@ -183,9 +177,7 @@ describe RakeDocker::Tasks::Publish do
 
     namespace :image do
       subject.define(
-          push_task_name: ->(t) {
-            t.scope.path_with_task_name(:push_it)
-          },
+          push_task_name: :push_it,
           argument_names: [:thing1, :thing2])
     end
 

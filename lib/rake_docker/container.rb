@@ -25,6 +25,23 @@ module RakeDocker
       reporter.done
     end
 
+    def destroy
+      reporter.checking_if_container_exists(name)
+      container = find_container(name)
+      if container
+        reporter.container_exists(container)
+        reporter.stopping_container(container)
+        container.stop
+        reporter.container_stopped(container)
+        reporter.deleting_container(container)
+        container.delete
+        reporter.container_deleted(container)
+      else
+        reporter.container_does_not_exist(name)
+      end
+      reporter.done
+    end
+
     REPORTER_MESSAGES = [
         :checking_if_container_exists,
         :container_exists,
@@ -43,6 +60,10 @@ module RakeDocker
         :container_started,
         :waiting_for_container_to_be_ready,
         :container_ready,
+        :stopping_container,
+        :container_stopped,
+        :deleting_container,
+        :container_deleted,
         :done
     ]
 

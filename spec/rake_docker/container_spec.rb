@@ -11,6 +11,7 @@ describe RakeDocker::Container do
       allow(Docker::Container)
           .to(receive(:get).with(name)
               .and_return(underlying_container))
+      expect(underlying_container).not_to(receive(:start))
       expect(Docker::Image).not_to(receive(:create))
       expect(Docker::Container).not_to(receive(:create))
 
@@ -37,6 +38,7 @@ describe RakeDocker::Container do
       allow(Docker::Container)
           .to(receive(:get).with(name)
               .and_return(underlying_container))
+      expect(underlying_container).to(receive(:start))
       expect(Docker::Image).not_to(receive(:create))
       expect(Docker::Container).not_to(receive(:create))
 
@@ -45,7 +47,6 @@ describe RakeDocker::Container do
 
       container.provision
 
-      expect(underlying_container).to(be_running)
       expect(reporter.messages)
           .to(eq([
               [:checking_if_container_exists, [name]],
@@ -78,13 +79,13 @@ describe RakeDocker::Container do
                       name: name,
                       Image: image))
               .and_return(underlying_container))
+      expect(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
       container = RakeDocker::Container.new(name, image, reporter: reporter)
 
       container.provision
 
-      expect(underlying_container).to(be_running)
       expect(reporter.messages)
           .to(eq([
               [:checking_if_container_exists, [name]],
@@ -121,13 +122,13 @@ describe RakeDocker::Container do
                       name: name,
                       Image: image))
               .and_return(underlying_container))
+      expect(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
       container = RakeDocker::Container.new(name, image, reporter: reporter)
 
       container.provision
 
-      expect(underlying_container).to(be_running)
       expect(reporter.messages)
           .to(eq([
               [:checking_if_container_exists, [name]],
@@ -160,6 +161,7 @@ describe RakeDocker::Container do
       allow(Docker::Image)
           .to(receive(:all).with(filter: image)
               .and_return([underlying_image]))
+      allow(underlying_container).to(receive(:start))
 
       expect(Docker::Container)
           .to(receive(:create)
@@ -190,6 +192,7 @@ describe RakeDocker::Container do
       allow(Docker::Image)
           .to(receive(:all).with(filter: image)
               .and_return([underlying_image]))
+      allow(underlying_container).to(receive(:start))
 
       expect(Docker::Container)
           .to(receive(:create)
@@ -233,6 +236,7 @@ describe RakeDocker::Container do
       allow(Docker::Container)
           .to(receive(:create)
               .and_return(underlying_container))
+      allow(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
       container = RakeDocker::Container.new(
@@ -255,6 +259,58 @@ describe RakeDocker::Container do
               [:container_started, [underlying_container]],
               [:waiting_for_container_to_be_ready, [underlying_container]],
               [:container_ready, [underlying_container]],
+              [:done, []]
+          ]))
+    end
+  end
+
+  context "destroy" do
+    it 'does nothing when the container does not exist' do
+      name = 'my-container'
+      image = 'nginx:latest'
+
+      allow(Docker::Container)
+          .to(receive(:get).with(name)
+              .and_raise(Docker::Error::NotFoundError))
+
+      reporter = MockReporter.new
+      container = RakeDocker::Container.new(name, image, reporter: reporter)
+
+      container.destroy
+
+      expect(reporter.messages)
+          .to(eq([
+              [:checking_if_container_exists, [name]],
+              [:container_does_not_exist, [name]],
+              [:done, []]
+          ]))
+    end
+
+    it 'stops and deletes the container when the container exists' do
+      name = 'my-container'
+      image = 'nginx:latest'
+      underlying_container = MockDockerContainer.running(name)
+
+      allow(Docker::Container)
+          .to(receive(:get).with(name)
+              .and_return(underlying_container))
+
+      expect(underlying_container).to(receive(:stop).ordered)
+      expect(underlying_container).to(receive(:delete).ordered)
+
+      reporter = MockReporter.new
+      container = RakeDocker::Container.new(name, image, reporter: reporter)
+
+      container.destroy
+
+      expect(reporter.messages)
+          .to(eq([
+              [:checking_if_container_exists, [name]],
+              [:container_exists, [underlying_container]],
+              [:stopping_container, [underlying_container]],
+              [:container_stopped, [underlying_container]],
+              [:deleting_container, [underlying_container]],
+              [:container_deleted, [underlying_container]],
               [:done, []]
           ]))
     end
@@ -297,13 +353,5 @@ class MockDockerContainer
 
   def json
     {'State' => {'Status' => status}}
-  end
-
-  def start
-    self.status = 'running'
-  end
-
-  def running?
-    self.status == 'running'
   end
 end

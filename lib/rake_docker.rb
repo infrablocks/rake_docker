@@ -8,6 +8,6 @@ require 'rake_docker/authentication'
 
 module RakeDocker
   def self.define_image_tasks(opts = {}, &block)
-    RakeDocker::TaskSets::All.define(opts, &block)
+    RakeDocker::TaskSets::Image.define(opts, &block)
   end
 end

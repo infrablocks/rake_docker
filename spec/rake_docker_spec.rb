@@ -6,7 +6,7 @@ RSpec.describe RakeDocker do
   end
 
   context 'define_image_tasks' do
-    context 'when instantiating RakeDocker::Tasks::All' do
+    context 'when instantiating RakeDocker::Tasks::Image' do
       it 'passes the provided block' do
         opts = {image_name: 'nginx'}
 
@@ -19,7 +19,7 @@ RSpec.describe RakeDocker do
           t.tags = ['latest']
         end
 
-        expect(RakeDocker::TaskSets::All)
+        expect(RakeDocker::TaskSets::Image)
             .to(receive(:define) do |passed_opts, &passed_block|
               expect(passed_opts).to(eq(opts))
               expect(passed_block).to(eq(block))

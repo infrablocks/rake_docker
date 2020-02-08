@@ -5,7 +5,7 @@ require_relative '../tasks'
 
 module RakeDocker
   module TaskSets
-    class All < RakeFactory::TaskSet
+    class Image < RakeFactory::TaskSet
       prepend RakeFactory::Namespaceable
 
       parameter :image_name, required: true

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'fileutils'
 
-describe RakeDocker::TaskSets::All do
+describe RakeDocker::TaskSets::Image do
   include_context :rake
 
   def define_tasks(opts = {}, &block)
@@ -14,7 +14,7 @@ describe RakeDocker::TaskSets::All do
     }.merge(opts), &block)
   end
 
-  it 'adds all tasks in the provided namespace when supplied' do
+  it 'adds all image tasks in the provided namespace when supplied' do
     define_tasks(namespace: :some_image)
 
     expect(Rake::Task.task_defined?('some_image:clean')).to(be(true))
@@ -24,7 +24,7 @@ describe RakeDocker::TaskSets::All do
     expect(Rake::Task.task_defined?('some_image:push')).to(be(true))
   end
 
-  it 'adds all tasks in the root namespace when none supplied' do
+  it 'adds all image tasks in the root namespace when none supplied' do
     define_tasks
 
     expect(Rake::Task.task_defined?('clean')).to(be(true))

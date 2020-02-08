@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'docker'
 
 describe RakeDocker::Container do
-  context "provision" do
+  context RakeDocker::Container::Provisioner do
     it 'does nothing when container is already running' do
       name = 'my-container'
       image = 'nginx:latest'
@@ -16,9 +16,10 @@ describe RakeDocker::Container do
       expect(Docker::Container).not_to(receive(:create))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(name, image, reporter: reporter)
 
-      container.provision
+      provisioner.execute
 
       expect(reporter.messages)
           .to(eq([
@@ -43,9 +44,10 @@ describe RakeDocker::Container do
       expect(Docker::Container).not_to(receive(:create))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(name, image, reporter: reporter)
 
-      container.provision
+      provisioner.execute
 
       expect(reporter.messages)
           .to(eq([
@@ -82,9 +84,10 @@ describe RakeDocker::Container do
       expect(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(name, image, reporter: reporter)
 
-      container.provision
+      provisioner.execute
 
       expect(reporter.messages)
           .to(eq([
@@ -125,9 +128,10 @@ describe RakeDocker::Container do
       expect(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(name, image, reporter: reporter)
 
-      container.provision
+      provisioner.execute
 
       expect(reporter.messages)
           .to(eq([
@@ -171,12 +175,13 @@ describe RakeDocker::Container do
               .and_return(underlying_container))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(
-          name, image,
-          reporter: reporter,
-          environment: environment)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(
+              name, image,
+              reporter: reporter,
+              environment: environment)
 
-      container.provision
+      provisioner.execute
     end
 
     it 'configures the provided port mappings when creating the container' do
@@ -207,12 +212,13 @@ describe RakeDocker::Container do
               .and_return(underlying_container))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(
-          name, image,
-          reporter: reporter,
-          ports: ports)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(
+              name, image,
+              reporter: reporter,
+              ports: ports)
 
-      container.provision
+      provisioner.execute
     end
 
     it 'calls the supplied readiness poller when provided' do
@@ -239,12 +245,13 @@ describe RakeDocker::Container do
       allow(underlying_container).to(receive(:start))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(
-          name, image,
-          reporter: reporter,
-          ready?: ready)
+      provisioner = RakeDocker::Container::Provisioner
+          .new(
+              name, image,
+              reporter: reporter,
+              ready?: ready)
 
-      container.provision
+      provisioner.execute
 
       expect(ready_calls).to(eq([[underlying_container]]))
       expect(reporter.messages)
@@ -264,7 +271,7 @@ describe RakeDocker::Container do
     end
   end
 
-  context "destroy" do
+  context RakeDocker::Container::Destroyer do
     it 'does nothing when the container does not exist' do
       name = 'my-container'
       image = 'nginx:latest'
@@ -274,9 +281,10 @@ describe RakeDocker::Container do
               .and_raise(Docker::Error::NotFoundError))
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      destroyer = RakeDocker::Container::Destroyer
+          .new(name, reporter: reporter)
 
-      container.destroy
+      destroyer.execute
 
       expect(reporter.messages)
           .to(eq([
@@ -299,9 +307,10 @@ describe RakeDocker::Container do
       expect(underlying_container).to(receive(:delete).ordered)
 
       reporter = MockReporter.new
-      container = RakeDocker::Container.new(name, image, reporter: reporter)
+      destroyer = RakeDocker::Container::Destroyer
+          .new(name, reporter: reporter)
 
-      container.destroy
+      destroyer.execute
 
       expect(reporter.messages)
           .to(eq([

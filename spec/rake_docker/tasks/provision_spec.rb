@@ -25,7 +25,7 @@ describe RakeDocker::Tasks::Provision do
     end
 
     expect(Rake::Task["container:provision"].full_comment)
-        .to(eq('Start web-server container.'))
+        .to(eq('Provision web-server container.'))
   end
 
   it 'allows the task name to be overridden' do

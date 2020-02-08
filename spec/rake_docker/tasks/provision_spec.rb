@@ -59,6 +59,8 @@ describe RakeDocker::Tasks::Provision do
   it 'fails if no container name is provided' do
     subject.define(image: 'nginx:latest')
 
+    stub_provisioner
+
     expect {
       Rake::Task["provision"].invoke
     }.to raise_error(RakeFactory::RequiredParameterUnset)
@@ -67,9 +69,57 @@ describe RakeDocker::Tasks::Provision do
   it 'fails if no image is provided' do
     subject.define(container_name: 'web-server')
 
+    stub_provisioner
+
     expect {
       Rake::Task["provision"].invoke
     }.to raise_error(RakeFactory::RequiredParameterUnset)
+  end
+
+  it 'creates and executes a provisioner on invocation' do
+    container_name = "web-server"
+    image = "nginx:latest"
+    ports = ["1234:1234"]
+    environment = {
+        "THING1" => "one",
+        "THING2" => "two"
+    }
+    reporter = RakeDocker::Container::NullReporter.new
+    ready_check = proc { true }
+
+    provisioner = double('provisioner')
+
+    expect(RakeDocker::Container::Provisioner)
+        .to(receive(:new)
+            .with(
+                container_name,
+                image,
+                ports: ports,
+                environment: environment,
+                reporter: reporter,
+                ready?: ready_check
+            )
+            .and_return(provisioner))
+    expect(provisioner).to(receive(:execute))
+
+    subject.define(
+        container_name: container_name,
+        image: image,
+        ports: ports,
+        environment: environment,
+        reporter: reporter,
+        ready_check: ready_check)
+
+    rake_task = Rake::Task["provision"]
+
+    rake_task.invoke
+  end
+
+  def stub_provisioner
+    provisioner = double('provisioner')
+    allow(RakeDocker::Container::Provisioner)
+        .to(receive(:new).and_return(provisioner))
+    allow(provisioner).to(receive(:execute))
   end
 
   def stub_puts

@@ -6,7 +6,7 @@ module RakeDocker
   module Tasks
     class Destroy < RakeFactory::Task
       default_name :destroy
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Destroy #{t.container_name ? "#{t.container_name} " : ""}container."
       }
 
@@ -15,8 +15,7 @@ module RakeDocker
       parameter :reporter, default: Container::NullReporter.new
 
       action do |t|
-        puts "Destroying #{t.container_name ? "#{t.container_name} " : ""} " +
-            "container"
+        puts "Destroying #{t.container_name} container"
         destroyer = Container::Destroyer.new(
             t.container_name,
             reporter: t.reporter)

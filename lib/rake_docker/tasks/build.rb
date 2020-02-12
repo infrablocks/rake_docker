@@ -7,8 +7,10 @@ module RakeDocker
   module Tasks
     class Build < RakeFactory::Task
       default_name :build
-      default_description ->(t) { "Build #{t.image_name} image" }
-      default_prerequisites ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
+        "Build #{t.image_name} image"
+      }
+      default_prerequisites RakeFactory::DynamicValue.new { |t|
         t.prepare_task_name ?
             [Rake.application.current_scope
                 .path_with_task_name(t.prepare_task_name)] :

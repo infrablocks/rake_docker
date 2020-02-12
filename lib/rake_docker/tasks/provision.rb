@@ -6,7 +6,7 @@ module RakeDocker
   module Tasks
     class Provision < RakeFactory::Task
       default_name :provision
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Provision #{t.container_name ? "#{t.container_name} " : ""}container."
       }
 
@@ -20,8 +20,7 @@ module RakeDocker
       parameter :reporter, default: Container::NullReporter.new
 
       action do |t|
-        puts "Provisioning #{t.container_name ? "#{t.container_name} " : ""} " +
-            "container"
+        puts "Provisioning #{t.container_name} container"
         provisioner = Container::Provisioner.new(
             t.container_name,
             t.image,

@@ -5,7 +5,7 @@ module RakeDocker
   module Tasks
     class Tag < RakeFactory::Task
       default_name :tag
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Tag #{t.image_name} image for repository"
       }
 

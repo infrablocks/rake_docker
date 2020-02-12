@@ -4,7 +4,9 @@ module RakeDocker
   module Tasks
     class Publish < RakeFactory::Task
       default_name :publish
-      default_description ->(t) { "Publish #{t.image_name} image" }
+      default_description RakeFactory::DynamicValue.new { |t|
+        "Publish #{t.image_name} image"
+      }
 
       parameter :image_name
 

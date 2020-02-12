@@ -4,7 +4,7 @@ module RakeDocker
   module Tasks
     class Prepare < RakeFactory::Task
       default_name :prepare
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Prepare for build of #{t.image_name} image"
       }
 

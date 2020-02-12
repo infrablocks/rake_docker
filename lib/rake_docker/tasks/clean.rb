@@ -4,7 +4,7 @@ module RakeDocker
   module Tasks
     class Clean < RakeFactory::Task
       default_name :clean
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Clean #{t.image_name} image directory"
       }
 

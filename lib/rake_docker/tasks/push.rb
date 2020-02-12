@@ -5,7 +5,7 @@ module RakeDocker
   module Tasks
     class Push < RakeFactory::Task
       default_name :push
-      default_description ->(t) {
+      default_description RakeFactory::DynamicValue.new { |t|
         "Push #{t.image_name} image to repository"
       }
 

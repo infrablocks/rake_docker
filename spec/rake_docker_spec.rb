@@ -6,7 +6,7 @@ RSpec.describe RakeDocker do
   end
 
   context 'define_image_tasks' do
-    context 'when instantiating RakeDocker::Tasks::Image' do
+    context 'when instantiating RakeDocker::TaskSets::Image' do
       it 'passes the provided block' do
         opts = {image_name: 'nginx'}
 
@@ -26,6 +26,26 @@ RSpec.describe RakeDocker do
             end)
 
         RakeDocker.define_image_tasks(opts, &block)
+      end
+    end
+  end
+
+  context 'define_container_tasks' do
+    context 'when instantiating RakeDocker::TaskSets::Container' do
+      it 'passes the provided block' do
+        opts = {container_name: 'web-server'}
+
+        block = lambda do |t|
+          t.image = 'my-org/nginx'
+        end
+
+        expect(RakeDocker::TaskSets::Container)
+            .to(receive(:define) do |passed_opts, &passed_block|
+              expect(passed_opts).to(eq(opts))
+              expect(passed_block).to(eq(block))
+            end)
+
+        RakeDocker.define_container_tasks(opts, &block)
       end
     end
   end

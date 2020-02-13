@@ -10,4 +10,8 @@ module RakeDocker
   def self.define_image_tasks(opts = {}, &block)
     RakeDocker::TaskSets::Image.define(opts, &block)
   end
+
+  def self.define_container_tasks(opts = {}, &block)
+    RakeDocker::TaskSets::Container.define(opts, &block)
+  end
 end

@@ -35,6 +35,21 @@ release a new version, update the version number in `version.rb`, and then run
 git commits and tags, and push the `.gem` file to
 [rubygems.org](https://rubygems.org).
 
+### Copying files to Docker Container
+
+The `RakeDocker.define_image_tasks()` in the `Rakefile` returns a list of 
+`Tasks`. To `COPY` files to a Docker container, configure the tasks by setting
+the `copy_spec` attribute on the `Task` object to a list of file paths.
+
+Example:
+```
+t.copy_spec = [
+    'project_root/path/to/file1',
+    'project_root/path/to/file2',
+    'project_root/path/to/file3'
+]
+```
+
 ### Managing CircleCI keys
 
 To encrypt a GPG key for use by CircleCI:

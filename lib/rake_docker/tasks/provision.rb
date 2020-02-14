@@ -21,6 +21,12 @@ module RakeDocker
 
       action do |t|
         puts "Provisioning #{t.container_name} container"
+        puts t.container_name
+        puts t.image
+        puts t.ports
+        puts t.environment
+        puts t.ready_check
+        puts t.reporter
         provisioner = Container::Provisioner.new(
             t.container_name,
             t.image,

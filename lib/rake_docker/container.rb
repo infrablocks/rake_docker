@@ -267,7 +267,7 @@ module RakeDocker
           pp Docker::Container.all
           reporter.container_stopped(container)
           reporter.deleting_container(container)
-          # container.delete
+          container.delete
           reporter.container_deleted(container)
         else
           reporter.container_does_not_exist(name)

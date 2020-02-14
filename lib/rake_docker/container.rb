@@ -26,7 +26,7 @@ module RakeDocker
     ]
 
     class NullReporter
-      REPORTER_MESSAGES.each { |message| define_method(message) {} }
+      REPORTER_MESSAGES.each { |message| define_method(message) { |*_| } }
     end
 
     class PrintingReporter

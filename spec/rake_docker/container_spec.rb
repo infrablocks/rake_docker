@@ -303,6 +303,7 @@ describe RakeDocker::Container do
               .and_return(underlying_container))
 
       expect(underlying_container).to(receive(:stop).ordered)
+      expect(underlying_container).to(receive(:wait).ordered)
       expect(underlying_container).to(receive(:delete).ordered)
 
       reporter = MockReporter.new

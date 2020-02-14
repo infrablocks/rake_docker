@@ -62,8 +62,8 @@ module RakeDocker
         puts "Image #{image} pulled. Continuing."
       end
 
-      def creating_container(_, _)
-        puts 'Creating...'
+      def creating_container(name, image)
+        puts "Creating #{name} container from image #{image}..."
       end
 
       def container_created(container)
@@ -257,10 +257,17 @@ module RakeDocker
         if container
           reporter.container_exists(container)
           reporter.stopping_container(container)
-          container.stop
+          updated = container.stop
+          require 'pp'
+          puts "Original ***************"
+          pp container
+          puts "Updated ***************"
+          pp updated
+          puts "List ***************"
+          pp Docker::Container.all
           reporter.container_stopped(container)
           reporter.deleting_container(container)
-          container.delete
+          # container.delete
           reporter.container_deleted(container)
         else
           reporter.container_does_not_exist(name)

@@ -274,7 +274,6 @@ describe RakeDocker::Container do
   context RakeDocker::Container::Destroyer do
     it 'does nothing when the container does not exist' do
       name = 'my-container'
-      image = 'nginx:latest'
 
       allow(Docker::Container)
           .to(receive(:get).with(name)
@@ -296,9 +295,9 @@ describe RakeDocker::Container do
 
     it 'stops and deletes the container when the container exists' do
       name = 'my-container'
-      image = 'nginx:latest'
       underlying_container = MockDockerContainer.running(name)
 
+      allow(Docker::Container).to(receive(:all).and_return([]))
       allow(Docker::Container)
           .to(receive(:get).with(name)
               .and_return(underlying_container))

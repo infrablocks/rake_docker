@@ -17,7 +17,7 @@ module RakeDocker
 
       parameter :ready_check
 
-      parameter :reporter, default: Container::NullReporter.new
+      parameter :reporter, default: Container::PrintingReporter.new
 
       action do |t|
         puts "Provisioning #{t.container_name} container"

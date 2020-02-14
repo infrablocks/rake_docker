@@ -29,6 +29,96 @@ module RakeDocker
       REPORTER_MESSAGES.each { |message| define_method(message) {} }
     end
 
+    class PrintingReporter
+      def checking_if_container_exists(name)
+        puts "Checking to see if #{name} exists..."
+      end
+
+      def container_exists(container)
+        print "#{container.json['Name']} exists. "
+      end
+
+      def container_does_not_exist(name)
+        puts "#{name} does not exist. Continuing."
+      end
+
+      def checking_if_image_available(image)
+        puts "Checking if image #{image} is available locally..."
+      end
+
+      def image_available(image)
+        puts "Image #{image} available. Continuing."
+      end
+
+      def image_not_available(image)
+        print "Image #{image} not found. "
+      end
+
+      def pulling_image(_)
+        puts 'Pulling.'
+      end
+
+      def image_pulled(image)
+        puts "Image #{image} pulled. Continuing."
+      end
+
+      def creating_container(_, _)
+        puts 'Creating...'
+      end
+
+      def container_created(container)
+        print "#{container.json['Name']} created with ID: #{container.id}. "
+      end
+
+      def checking_if_container_running(_)
+        puts 'Checking to see if it is running...'
+      end
+
+      def container_running(_)
+        puts 'Container is running. Continuing.'
+      end
+
+      def container_not_running(_)
+        print 'Container is not running. '
+      end
+
+      def starting_container(_)
+        puts 'Starting...'
+      end
+
+      def container_started(_)
+        puts 'Container started. Continuing.'
+      end
+
+      def waiting_for_container_to_be_ready(_)
+        puts 'Waiting for container to be ready...'
+      end
+
+      def container_ready(_)
+        puts 'Container ready. Continuing.'
+      end
+
+      def stopping_container(_)
+        puts 'Stopping...'
+      end
+
+      def container_stopped(_)
+        print "#{container.json['Name']} stopped. "
+      end
+
+      def deleting_container(_)
+        puts 'Deleting...'
+      end
+
+      def container_deleted(_)
+        puts "#{container.json['Name']} deleted."
+      end
+
+      def done
+        puts 'Done.'
+      end
+    end
+
     module Utilities
       def find_container(name)
         begin

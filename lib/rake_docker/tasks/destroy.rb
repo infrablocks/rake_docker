@@ -12,7 +12,7 @@ module RakeDocker
 
       parameter :container_name, :required => true
 
-      parameter :reporter, default: Container::NullReporter.new
+      parameter :reporter, default: Container::PrintingReporter.new
 
       action do |t|
         puts "Destroying #{t.container_name} container"

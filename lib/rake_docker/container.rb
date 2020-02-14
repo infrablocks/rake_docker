@@ -31,7 +31,7 @@ module RakeDocker
 
     class PrintingReporter
       def checking_if_container_exists(name)
-        puts "Checking to see if #{name} exists..."
+        puts "Checking to see if /#{name} exists..."
       end
 
       def container_exists(container)
@@ -39,7 +39,7 @@ module RakeDocker
       end
 
       def container_does_not_exist(name)
-        puts "#{name} does not exist. Continuing."
+        puts "/#{name} does not exist. Continuing."
       end
 
       def checking_if_image_available(image)
@@ -102,7 +102,7 @@ module RakeDocker
         puts 'Stopping...'
       end
 
-      def container_stopped(_)
+      def container_stopped(container)
         print "#{container.json['Name']} stopped. "
       end
 
@@ -110,7 +110,7 @@ module RakeDocker
         puts 'Deleting...'
       end
 
-      def container_deleted(_)
+      def container_deleted(container)
         puts "#{container.json['Name']} deleted."
       end
 

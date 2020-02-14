@@ -34,6 +34,7 @@ module RakeDocker
             environment: t.environment,
             ready?: t.ready_check,
             reporter: t.reporter)
+        puts "Construction successful. Executing."
         provisioner.execute
       end
     end

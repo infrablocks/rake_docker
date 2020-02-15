@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rake_docker (2.4.0.pre.13)
+    rake_docker (2.5.0)
       aws-sdk-ecr (~> 1.2)
       colored2 (~> 3.1)
       docker-api (~> 1.34)

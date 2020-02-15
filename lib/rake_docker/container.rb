@@ -33,15 +33,15 @@ module RakeDocker
 
     class PrintingReporter
       def checking_if_container_exists(name)
-        puts "Checking to see if /#{name} exists..."
+        puts "Checking to see if #{name} exists..."
       end
 
       def container_exists(container)
-        print "#{container.json['Name']} exists. "
+        print "#{container.name} exists. "
       end
 
       def container_does_not_exist(name)
-        puts "/#{name} does not exist. Continuing."
+        puts "#{name} does not exist. Continuing."
       end
 
       def checking_if_image_available(image)
@@ -69,7 +69,7 @@ module RakeDocker
       end
 
       def container_created(container)
-        print "#{container.json['Name']} created with ID: #{container.id}. "
+        print "#{container.name} created with ID: #{container.id}. "
       end
 
       def checking_if_container_running(_)
@@ -105,7 +105,7 @@ module RakeDocker
       end
 
       def container_stopped(container)
-        print "#{container.json['Name']} stopped. "
+        print "#{container.name} stopped. "
       end
 
       def deleting_container(_)
@@ -113,7 +113,7 @@ module RakeDocker
       end
 
       def container_deleted(container)
-        puts "#{container.json['Name']} deleted."
+        puts "#{container.name} deleted."
       end
 
       def done
@@ -124,7 +124,11 @@ module RakeDocker
     module Utilities
       def find_container(name)
         begin
-          Docker::Container.get(name)
+          container = Docker::Container.get(name)
+          container.instance_eval do
+            define_singleton_method(:name) { name }
+          end
+          container
         rescue Docker::Error::NotFoundError
           nil
         end
@@ -263,16 +267,7 @@ module RakeDocker
           container.wait
           reporter.container_stopped(container)
           reporter.deleting_container(container)
-          begin
-            container.delete
-          rescue Docker::Error::NotFoundError
-            # ignored, not sure why this happens though...
-            puts "Got not found error..."
-          rescue StandardError => e
-            require 'pp'
-            pp e
-            puts "Got different error..."
-          end
+          container.delete
           reporter.container_deleted(container)
         else
           reporter.container_does_not_exist(name)

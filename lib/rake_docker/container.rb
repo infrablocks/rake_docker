@@ -184,7 +184,7 @@ module RakeDocker
 
       def ensure_container_running(container)
         reporter.checking_if_container_running(container)
-        container = Docker::Container.get(name)
+        container = find_container(name)
         if !container_running?(container)
           reporter.container_not_running(container)
           start_container(container)

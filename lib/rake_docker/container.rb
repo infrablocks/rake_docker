@@ -267,6 +267,11 @@ module RakeDocker
             container.delete
           rescue Docker::Error::NotFoundError
             # ignored, not sure why this happens though...
+            puts "Got not found error..."
+          rescue StandardError => e
+            require 'pp'
+            pp e
+            puts "Got different error..."
           end
           reporter.container_deleted(container)
         else

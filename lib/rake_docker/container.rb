@@ -124,14 +124,17 @@ module RakeDocker
     module Utilities
       def find_container(name)
         begin
-          container = Docker::Container.get(name)
-          container.instance_eval do
-            define_singleton_method(:name) { name }
-          end
-          container
+          enhance_with_name(Docker::Container.get(name), name)
         rescue Docker::Error::NotFoundError
           nil
         end
+      end
+
+      def enhance_with_name(container, name)
+        container.instance_eval do
+          define_singleton_method(:name) { name }
+        end
+        container
       end
     end
 
@@ -208,6 +211,7 @@ module RakeDocker
                 PortBindings: port_bindings
             },
             Env: environment)
+        container = enhance_with_name(container, name)
         reporter.container_created(container)
         container
       end

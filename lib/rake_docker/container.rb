@@ -1,3 +1,5 @@
+require 'docker'
+
 module RakeDocker
   module Container
     REPORTER_MESSAGES = [
@@ -257,15 +259,15 @@ module RakeDocker
         if container
           reporter.container_exists(container)
           reporter.stopping_container(container)
-          updated = container.stop
-          puts "Waiting..."
+          container.stop
           container.wait
-          puts "List ***************"
-          require 'pp'
-          pp Docker::Container.all(all: true)
           reporter.container_stopped(container)
           reporter.deleting_container(container)
-          updated.delete
+          begin
+            container.delete
+          rescue Docker::NotFoundError
+            # ignored, not sure why this happens though...
+          end
           reporter.container_deleted(container)
         else
           reporter.container_does_not_exist(name)

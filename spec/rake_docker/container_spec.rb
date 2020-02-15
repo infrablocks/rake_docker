@@ -297,13 +297,11 @@ describe RakeDocker::Container do
       name = 'my-container'
       underlying_container = MockDockerContainer.running(name)
 
-      allow(Docker::Container).to(receive(:all).and_return([]))
       allow(Docker::Container)
           .to(receive(:get).with(name)
               .and_return(underlying_container))
 
-      expect(underlying_container)
-          .to(receive(:stop).ordered.and_return(underlying_container))
+      expect(underlying_container).to(receive(:stop).ordered)
       expect(underlying_container).to(receive(:wait).ordered)
       expect(underlying_container).to(receive(:delete).ordered)
 

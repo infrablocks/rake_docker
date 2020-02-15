@@ -302,7 +302,8 @@ describe RakeDocker::Container do
           .to(receive(:get).with(name)
               .and_return(underlying_container))
 
-      expect(underlying_container).to(receive(:stop).ordered)
+      expect(underlying_container)
+          .to(receive(:stop).ordered.and_return(underlying_container))
       expect(underlying_container).to(receive(:wait).ordered)
       expect(underlying_container).to(receive(:delete).ordered)
 

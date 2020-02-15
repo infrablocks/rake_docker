@@ -257,15 +257,15 @@ module RakeDocker
         if container
           reporter.container_exists(container)
           reporter.stopping_container(container)
-          container.stop
+          updated = container.stop
+          puts "Waiting..."
+          container.wait
           puts "List ***************"
           require 'pp'
           pp Docker::Container.all(all: true)
-          puts "Waiting..."
-          container.wait
           reporter.container_stopped(container)
           reporter.deleting_container(container)
-          container.delete
+          updated.delete
           reporter.container_deleted(container)
         else
           reporter.container_does_not_exist(name)

@@ -265,7 +265,7 @@ module RakeDocker
           reporter.deleting_container(container)
           begin
             container.delete
-          rescue Docker::NotFoundError
+          rescue Docker::Error::NotFoundError
             # ignored, not sure why this happens though...
           end
           reporter.container_deleted(container)

@@ -176,6 +176,27 @@ describe RakeDocker::Tasks::Prepare do
     expect(File.exist?('build/nginx/the/destination/file2.rb')).to(be(true))
   end
 
+  it 'copies nested files' do
+    FileUtils.mkdir_p('source')
+    File.open('source/file1.txt', 'w') { |f| f.write('file1') }
+    File.open('source/file2.rb', 'w') { |f| f.write('file2') }
+
+    namespace :image do
+      subject.define(
+          image_name: 'nginx',
+          work_directory: 'build',
+          copy_spec: [
+              {from: 'source/file1.txt', to: 'the/destination/file1.txt'},
+              {from: 'source/file2.rb', to: 'the/destination/file2.rb'}
+          ])
+    end
+
+    Rake::Task['image:prepare'].invoke
+
+    expect(File.exist?('build/nginx/the/destination/file1.txt')).to(be(true))
+    expect(File.exist?('build/nginx/the/destination/file2.rb')).to(be(true))
+  end
+
   it 'creates file from content' do
     namespace :image do
       subject.define(

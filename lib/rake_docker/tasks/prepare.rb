@@ -26,10 +26,11 @@ module RakeDocker
               image_directory
 
           if File.directory?(from)
-            FileUtils.mkdir_p to
-            FileUtils.cp_r from, to
+            FileUtils.mkdir_p(to)
+            FileUtils.cp_r(from, to)
           else
-            FileUtils.cp from, to
+            FileUtils.mkdir_p(File.dirname(to))
+            FileUtils.cp(from, to)
           end
         end
 

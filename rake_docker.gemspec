@@ -6,12 +6,12 @@ require 'rake_docker/version'
 Gem::Specification.new do |spec|
   spec.name = 'rake_docker'
   spec.version = RakeDocker::VERSION
-  spec.authors = ['Toby Clemson']
-  spec.email = ['tobyclemson@gmail.com']
+  spec.authors = ['InfraBlocks Maintainers']
+  spec.email = ['maintainers@infrablocks.io']
 
   spec.summary = 'Rake tasks for managing images and containers.'
   spec.description = 'Allows building, tagging and pushing images and creating, starting, stopping and removing containers from within rake tasks.'
-  spec.homepage = "https://github.com/tobyclemson/rake_docker"
+  spec.homepage = "https://github.com/infrablocks/rake_docker"
   spec.license = 'MIT'
 
   spec.files = `git ls-files -z`.split("\x0").select do |f|

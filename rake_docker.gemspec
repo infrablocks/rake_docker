@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake_gpg', '~> 0.12'
   spec.add_development_dependency 'rspec', '~> 3.9'
   spec.add_development_dependency 'gem-release', '~> 2.0'
-  spec.add_development_dependency 'activesupport', '~> 5.2'
+  spec.add_development_dependency 'activesupport', '~> 6.1'
   spec.add_development_dependency 'memfs', '~> 1.0'
   spec.add_development_dependency 'simplecov', '~> 0.16'
 end

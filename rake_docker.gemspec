@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.6'
 
-  spec.add_dependency 'docker-api', '~> 1.34'
+  spec.add_dependency 'docker-api', '>= 1.34', '< 3.0'
   spec.add_dependency 'rake_factory', '~> 0.23'
   spec.add_dependency 'aws-sdk-ecr', '~> 1.2'
   spec.add_dependency 'colored2', '~> 3.1'

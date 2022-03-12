@@ -1,3 +1,10 @@
+## 2.17.9 (March 12th, 2022)
+
+IMPROVEMENTS:
+
+* The `Build` task now supports a `platform` parameter.
+* The `Image` taskset now supports a `platform` parameter to pass on to `Build`.
+
 ## 0.16.0 (October 18th, 2018)
 
 IMPROVEMENTS:

@@ -23,6 +23,7 @@ module RakeDocker
       parameter :credentials
 
       parameter :build_args
+      parameter :platform
 
       parameter :work_directory, :required => true
 
@@ -34,6 +35,7 @@ module RakeDocker
         options = {t: t.repository_name}
         options = options.merge(
             buildargs: JSON.generate(t.build_args)) if t.build_args
+        options = options.merge(platform: t.platform) if t.platform
 
         Docker::Image.build_from_dir(
             File.join(t.work_directory, t.image_name),

@@ -190,6 +190,23 @@ describe RakeDocker::Tasks::Build do
     Rake::Task['image:build'].invoke
   end
 
+  it 'passes the specified platform when provided' do
+    define_task(
+      image_name: 'nginx',
+      repository_name: 'my-org/nginx',
+      work_directory: 'build',
+      platform: 'linux/amd64')
+
+    expect(Docker::Image)
+      .to(receive(:build_from_dir)
+            .with('build/nginx', {
+              t: 'my-org/nginx',
+              platform: 'linux/amd64'
+            }))
+
+    Rake::Task['image:build'].invoke
+  end
+
   it 'print progress to stdout' do
     define_task(
         image_name: 'nginx',

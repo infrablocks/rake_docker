@@ -214,6 +214,24 @@ describe RakeDocker::TaskSets::Image do
       expect(rake_task.creator.build_args).to(eq(build_args))
     end
 
+    it 'passes a nil platform when none supplied' do
+      define_tasks
+
+      rake_task = Rake::Task["build"]
+
+      expect(rake_task.creator.platform).to(be_nil)
+    end
+
+    it 'passes the provided build args when supplied' do
+      platform = 'linux/amd64'
+
+      define_tasks(platform: platform)
+
+      rake_task = Rake::Task["build"]
+
+      expect(rake_task.creator.platform).to(eq(platform))
+    end
+
     it 'uses an empty array for argument names by default' do
       define_tasks
 

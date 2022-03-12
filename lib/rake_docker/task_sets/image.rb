@@ -24,6 +24,7 @@ module RakeDocker
       parameter :credentials
 
       parameter :build_args
+      parameter :platform
 
       parameter :clean_task_name, default: :clean
       parameter :prepare_task_name, default: :prepare

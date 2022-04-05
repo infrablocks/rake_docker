@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 require 'aws-sdk-ecr'
-require 'ostruct'
 
 module RakeDocker
   module Authentication
     class ECR
-      def initialize &block
-        @config = OpenStruct.new(
-            region: nil,
-            registry_id: nil)
+      def initialize(&block)
+        @config =
+          Struct.new(:region, :registry_id)
+                .new(nil, nil)
         block.call(@config)
 
         @ecr_client = Aws::ECR::Client.new(region: @config.region)
@@ -18,22 +19,46 @@ module RakeDocker
       end
 
       def call
-        registry_id = @config.registry_id.respond_to?(:call) ?
-            @config.registry_id.call :
-            @config.registry_id
-
-        token_response = @ecr_client.get_authorization_token(
-            registry_ids: [registry_id])
-        token_data = token_response.authorization_data[0]
-        proxy_endpoint = token_data.proxy_endpoint
         email = 'none'
-        username, password =
-            Base64.decode64(token_data.authorization_token).split(':')
+        registry_id = resolve_registry_id
+        token = get_authorization_token(registry_id)
+        proxy_endpoint = extract_proxy_endpoint(token)
+        username, password = extract_credentials(token)
 
+        make_credentials_hash(email, password, username, proxy_endpoint)
+      end
+
+      private
+
+      def make_credentials_hash(email, password, username, proxy_endpoint)
         {
-            username: username, password: password, email: email,
-            serveraddress: proxy_endpoint
+          username: username,
+          password: password,
+          email: email,
+          serveraddress: proxy_endpoint
         }
+      end
+
+      def resolve_registry_id
+        if @config.registry_id.respond_to?(:call)
+          @config.registry_id.call
+        else
+          @config.registry_id
+        end
+      end
+
+      def get_authorization_token(registry_id)
+        @ecr_client
+          .get_authorization_token(registry_ids: [registry_id])
+          .authorization_data[0]
+      end
+
+      def extract_proxy_endpoint(token)
+        token.proxy_endpoint
+      end
+
+      def extract_credentials(token)
+        Base64.decode64(token.authorization_token).split(':')
       end
     end
   end

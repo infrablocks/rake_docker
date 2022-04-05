@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'rake_factory'
 
 module RakeDocker
   module Tasks
     class Publish < RakeFactory::Task
       default_name :publish
-      default_description RakeFactory::DynamicValue.new { |t|
+      default_description(RakeFactory::DynamicValue.new do |t|
         "Publish #{t.image_name} image"
-      }
+      end)
 
       parameter :image_name
 

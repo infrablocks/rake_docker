@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rake_docker/version'
 require 'rake_docker/output'
 require 'rake_docker/container'

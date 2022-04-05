@@ -1,33 +1,38 @@
+# frozen_string_literal: true
+
 require 'rake'
 require 'pp'
 require 'active_support'
-require 'active_support/core_ext/string/inflections.rb'
+require 'active_support/core_ext/string/inflections'
 require 'memfs'
 
 module MemFs
   class Dir
     def self.children(dirname, _)
-      self.entries(dirname) - [".", ".."]
+      entries(dirname) - ['.', '..']
     end
   end
 end
 
-shared_context :rake do
+# rubocop:disable RSpec/ContextWording
+shared_context 'rake' do
   include ::Rake::DSL if defined?(::Rake::DSL)
 
-  let(:rake) { Rake::Application.new }
   subject { self.class.top_level_description.constantize }
+
+  let(:rake) { Rake::Application.new }
 
   before do
     Rake.application = rake
   end
 
-  before(:each) do
+  before do
     Rake::Task.clear
     MemFs.activate!
   end
 
-  after(:each) do
+  after do
     MemFs.deactivate!
   end
 end
+# rubocop:enable RSpec/ContextWording

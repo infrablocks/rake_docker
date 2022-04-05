@@ -1,34 +1,38 @@
+# frozen_string_literal: true
+
 require 'docker'
 
 module RakeDocker
   module Container
-    REPORTER_MESSAGES = [
-        :checking_if_container_exists,
-        :container_exists,
-        :container_does_not_exist,
-        :checking_if_image_available,
-        :image_available,
-        :image_not_available,
-        :pulling_image,
-        :image_pulled,
-        :creating_container,
-        :container_created,
-        :checking_if_container_running,
-        :container_running,
-        :container_not_running,
-        :starting_container,
-        :container_started,
-        :waiting_for_container_to_be_ready,
-        :container_ready,
-        :stopping_container,
-        :container_stopped,
-        :deleting_container,
-        :container_deleted,
-        :done
-    ]
+    REPORTER_MESSAGES = %i[
+      checking_if_container_exists
+      container_exists
+      container_does_not_exist
+      checking_if_image_available
+      image_available
+      image_not_available
+      pulling_image
+      image_pulled
+      creating_container
+      container_created
+      checking_if_container_running
+      container_running
+      container_not_running
+      starting_container
+      container_started
+      waiting_for_container_to_be_ready
+      container_ready
+      stopping_container
+      container_stopped
+      deleting_container
+      container_deleted
+      done
+    ].freeze
 
     class NullReporter
-      REPORTER_MESSAGES.each { |message| define_method(message) { |*_| } }
+      REPORTER_MESSAGES.each do |message|
+        define_method(message, proc { |*_| })
+      end
     end
 
     class PrintingReporter
@@ -123,11 +127,9 @@ module RakeDocker
 
     module Utilities
       def find_container(name)
-        begin
-          enhance_with_name(Docker::Container.get(name), name)
-        rescue Docker::Error::NotFoundError
-          nil
-        end
+        enhance_with_name(Docker::Container.get(name), name)
+      rescue Docker::Error::NotFoundError
+        nil
       end
 
       def enhance_with_name(container, name)
@@ -138,6 +140,7 @@ module RakeDocker
       end
     end
 
+    # rubocop:disable Metrics/ClassLength
     class Provisioner
       include Utilities
 
@@ -152,6 +155,7 @@ module RakeDocker
         @reporter = opts[:reporter] || NullReporter.new
       end
 
+      # rubocop:disable Metrics/AbcSize
       def execute
         reporter.checking_if_container_exists(name)
         container = find_container(name)
@@ -160,13 +164,18 @@ module RakeDocker
           ensure_container_running(container)
         else
           reporter.container_does_not_exist(name)
-          ensure_image_available(image)
-          create_and_start_container(name, image, ports, environment)
+          start_new_container(name, image, ports, environment)
         end
         reporter.done
       end
+      # rubocop:enable Metrics/AbcSize
 
       private
+
+      def start_new_container(name, image, ports, environment)
+        ensure_image_available(image)
+        create_and_start_container(name, image, ports, environment)
+      end
 
       def ensure_image_available(image)
         reporter.checking_if_image_available(image)
@@ -188,11 +197,11 @@ module RakeDocker
       def ensure_container_running(container)
         reporter.checking_if_container_running(container)
         container = find_container(name)
-        if !container_running?(container)
+        if container_running?(container)
+          reporter.container_running(container)
+        else
           reporter.container_not_running(container)
           start_container(container)
-        else
-          reporter.container_running(container)
         end
       end
 
@@ -204,23 +213,32 @@ module RakeDocker
         exposed_ports, port_bindings = process_ports(ports)
         reporter.creating_container(name, image)
         container = Docker::Container.create(
-            name: name,
-            Image: image,
-            ExposedPorts: exposed_ports,
-            HostConfig: {
-                PortBindings: port_bindings
-            },
-            Env: environment)
+          make_container_options(
+            name, image, exposed_ports, port_bindings, environment
+          )
+        )
         container = enhance_with_name(container, name)
         reporter.container_created(container)
         container
+      end
+
+      def make_container_options(
+        name, image, exposed_ports, port_bindings, environment
+      )
+        {
+          name: name,
+          Image: image,
+          ExposedPorts: exposed_ports,
+          HostConfig: { PortBindings: port_bindings },
+          Env: environment
+        }
       end
 
       def start_container(container)
         reporter.starting_container(container)
         container.start
         reporter.container_started(container)
-        if ready && ready.respond_to?(:call)
+        if ready.respond_to?(:call)
           reporter.waiting_for_container_to_be_ready(container)
           ready.call(container)
           reporter.container_ready(container)
@@ -237,19 +255,18 @@ module RakeDocker
       end
 
       def process_ports(ports)
-        port_config = ports.reduce({
-            exposed_ports: {},
-            port_bindings: {}
-        }) do |accumulator, port|
+        port_config = ports.each_with_object(
+          { exposed_ports: {}, port_bindings: {} }
+        ) do |port, accumulator|
           host_port, container_port = port.split(':')
           accumulator[:exposed_ports]["#{container_port}/tcp"] = {}
           accumulator[:port_bindings]["#{container_port}/tcp"] =
-              [{:'HostPort' => host_port}]
-          accumulator
+            [{ HostPort: host_port }]
         end
         [port_config[:exposed_ports], port_config[:port_bindings]]
       end
     end
+    # rubocop:enable Metrics/ClassLength
 
     class Destroyer
       include Utilities
@@ -266,17 +283,23 @@ module RakeDocker
         container = find_container(name)
         if container
           reporter.container_exists(container)
-          reporter.stopping_container(container)
-          container.stop
-          container.wait
-          reporter.container_stopped(container)
-          reporter.deleting_container(container)
-          container.delete
-          reporter.container_deleted(container)
+          destroy_container(container)
         else
           reporter.container_does_not_exist(name)
         end
         reporter.done
+      end
+
+      private
+
+      def destroy_container(container)
+        reporter.stopping_container(container)
+        container.stop
+        container.wait
+        reporter.container_stopped(container)
+        reporter.deleting_container(container)
+        container.delete
+        reporter.container_deleted(container)
       end
     end
   end

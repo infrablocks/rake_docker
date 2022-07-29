@@ -22,8 +22,8 @@ Gem::Specification.new do |spec|
   spec.email = ['maintainers@infrablocks.io']
 
   spec.summary = 'Rake tasks for managing images and containers.'
-  spec.description = 'Allows building, tagging and pushing images and '\
-                     'creating, starting, stopping and removing containers '\
+  spec.description = 'Allows building, tagging and pushing images and ' \
+                     'creating, starting, stopping and removing containers ' \
                      'from within rake tasks.'
   spec.homepage = 'https://github.com/infrablocks/rake_docker'
   spec.license = 'MIT'

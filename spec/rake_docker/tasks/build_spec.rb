@@ -184,7 +184,7 @@ describe RakeDocker::Tasks::Build do
       .not_to(have_received(:authenticate!))
   end
 
-  it 'builds the image in the correct work directory tagging with the '\
+  it 'builds the image in the correct work directory tagging with the ' \
      'repository name' do
     define_task(
       image_name: 'nginx',

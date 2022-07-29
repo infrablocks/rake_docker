@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'aws-sdk-ecr'
 
 describe RakeDocker::Authentication::ECR do
-  it 'correctly fetches an authorization token for the supplied '\
+  it 'correctly fetches an authorization token for the supplied ' \
      'region and registry ID' do
     region = 'eu-west-2'
     registry_id = 'some-registry-id'

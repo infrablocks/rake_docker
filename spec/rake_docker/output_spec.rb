@@ -28,9 +28,9 @@ RSpec.describe RakeDocker::Output do
   # rubocop:enable RSpec/MultipleExpectations
 
   it 'skips progress status' do
-    chunk = '{"status":"Downloading","progressDetail":'\
-            '{"current":185116,"total":17538077},"progress":'\
-            '"[\u003e                                                  ]  '\
+    chunk = '{"status":"Downloading","progressDetail":' \
+            '{"current":185116,"total":17538077},"progress":' \
+            '"[\u003e                                                  ]  ' \
             '185.1kB/17.54MB","id":"46dde23c37b3"}'
 
     described_class.print(chunk)
@@ -39,8 +39,8 @@ RSpec.describe RakeDocker::Output do
   end
 
   it 'skips progress aux' do
-    chunk = '{"progressDetail":{},"aux":{"Tag":"0.1.0-20180924122438",'\
-            '"Digest":"sha256:e405ec36144686fb704c14c18e7fc512266dbb95'\
+    chunk = '{"progressDetail":{},"aux":{"Tag":"0.1.0-20180924122438",' \
+            '"Digest":"sha256:e405ec36144686fb704c14c18e7fc512266dbb95' \
             'fadd9a27df8c9f530c71e305","Size":2844}}'
 
     described_class.print(chunk)
@@ -50,21 +50,21 @@ RSpec.describe RakeDocker::Output do
 
   # rubocop:disable RSpec/MultipleExpectations
   it 'detects an error' do
-    chunk = '{"errorDetail":{"message":"name unknown: The repository with '\
-            'name \'test-repo\' does not exist in the registry with id '\
-            '\'123456780102\'"},"error":"name unknown: The repository with '\
-            'name \'test-repo\' does not exist in the registry with id '\
+    chunk = '{"errorDetail":{"message":"name unknown: The repository with ' \
+            'name \'test-repo\' does not exist in the registry with id ' \
+            '\'123456780102\'"},"error":"name unknown: The repository with ' \
+            'name \'test-repo\' does not exist in the registry with id ' \
             '\'123456780102\'"}'
 
     expect do
       described_class.print(chunk)
     end.to(raise_error(
              RuntimeError,
-             "name unknown: The repository with name 'test-repo' does not "\
+             "name unknown: The repository with name 'test-repo' does not " \
              "exist in the registry with id '123456780102'"
            ))
 
-    expected_error = "name unknown: The repository with name 'test-repo' "\
+    expected_error = "name unknown: The repository with name 'test-repo' " \
                      "does not exist in the registry with id '123456780102'"
     expect($stdout)
       .to(have_received(:print)
@@ -84,7 +84,7 @@ RSpec.describe RakeDocker::Output do
 
   # rubocop:disable RSpec/MultipleExpectations
   it 'parses multiple stream chunks' do
-    chunk = "{\"stream\":\"Step 1/8 : FROM openjdk:8-jre\"}\n"\
+    chunk = "{\"stream\":\"Step 1/8 : FROM openjdk:8-jre\"}\n" \
             '{"stream":"\\n"}'
 
     described_class.print(chunk)

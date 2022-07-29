@@ -190,7 +190,7 @@ describe RakeDocker::Tasks::Push do
   end
 
   # rubocop:disable RSpec/MultipleExpectations
-  it 'pushes the image tagged with the repository_url with each of the '\
+  it 'pushes the image tagged with the repository_url with each of the ' \
      'provided tags' do
     repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 

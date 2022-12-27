@@ -1,4 +1,12 @@
-## 2.17.9 (March 12th, 2022)
+## Unreleased
+
+## 2.18.0 (March 12th, 2022)
+
+IMPROVEMENTS:
+
+* Minor build system updates have been made, including Rubocop linting.
+
+## 2.17.0 (March 12th, 2022)
 
 IMPROVEMENTS:
 

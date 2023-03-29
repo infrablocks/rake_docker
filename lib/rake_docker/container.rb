@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'docker'
+require 'json'
 
 module RakeDocker
   module Container
@@ -179,7 +180,7 @@ module RakeDocker
 
       def ensure_image_available(image)
         reporter.checking_if_image_available(image)
-        matching_images = Docker::Image.all(filter: image)
+        matching_images = Docker::Image.all(filters: filters(image))
         if matching_images.empty?
           reporter.image_not_available(image)
           pull_image(image)
@@ -303,4 +304,12 @@ module RakeDocker
       end
     end
   end
+end
+
+def filters(image)
+  JSON.generate(
+    {
+      reference: [image]
+    }
+  )
 end

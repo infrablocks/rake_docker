@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'docker'
+require 'json'
 
 describe RakeDocker::Container do
   context RakeDocker::Container::Provisioner do
@@ -90,7 +91,7 @@ describe RakeDocker::Container do
         .to(receive(:get).with(name)
                          .and_raise(Docker::Error::NotFoundError))
       allow(Docker::Image)
-        .to(receive(:all).with(filter: image)
+        .to(receive(:all).with(filters: filters(image))
                          .and_return([underlying_image]))
       allow(Docker::Image).to(receive(:create))
       allow(Docker::Container)
@@ -135,7 +136,7 @@ describe RakeDocker::Container do
         .to(receive(:get).with(name)
                          .and_raise(Docker::Error::NotFoundError))
       allow(Docker::Image)
-        .to(receive(:all).with(filter: image)
+        .to(receive(:all).with(filters: filters(image))
                          .and_return([]))
       allow(Docker::Image)
         .to(receive(:create).with(fromImage: image))
@@ -188,7 +189,7 @@ describe RakeDocker::Container do
         .to(receive(:get).with(name)
                          .and_raise(Docker::Error::NotFoundError))
       allow(Docker::Image)
-        .to(receive(:all).with(filter: image)
+        .to(receive(:all).with(filters: filters(image))
                          .and_return([underlying_image]))
       allow(underlying_container).to(receive(:start))
       allow(Docker::Container)
@@ -221,7 +222,7 @@ describe RakeDocker::Container do
         .to(receive(:get).with(name)
                          .and_raise(Docker::Error::NotFoundError))
       allow(Docker::Image)
-        .to(receive(:all).with(filter: image)
+        .to(receive(:all).with(filters: filters(image))
                          .and_return([underlying_image]))
       allow(underlying_container).to(receive(:start))
 
@@ -272,7 +273,7 @@ describe RakeDocker::Container do
               .and_raise(Docker::Error::NotFoundError))
       allow(Docker::Image)
         .to(receive(:all)
-              .with(filter: image)
+              .with(filters: filters(image))
               .and_return([underlying_image]))
       allow(Docker::Container)
         .to(receive(:create)
@@ -402,4 +403,12 @@ class MockDockerContainer
   def json
     { 'State' => { 'Status' => status } }
   end
+end
+
+def filters(image)
+  JSON.generate(
+    {
+      reference: [image]
+    }
+  )
 end

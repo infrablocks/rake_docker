@@ -21,7 +21,31 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+To define tasks for managing a docker image:
+
+```ruby
+RakeDocker.define_image_tasks(
+  image_name: 'my-image'
+) do |t|
+  t.work_directory = 'build/images'
+
+  t.copy_spec = [
+    'src/my-image/Dockerfile',
+    'src/my-image/start.sh'
+  ]
+
+  t.repository_name = 'my-image'
+  t.repository_url = 'my-org/my-image'
+
+  t.credentials = YAML.load_file(
+    'config/secrets/dockerhub/credentials.yaml'
+  )
+
+  t.platform = 'linux/amd64'
+
+  t.tags = ['1.2.3', 'latest']
+end
+```
 
 ## Development
 

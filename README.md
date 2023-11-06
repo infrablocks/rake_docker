@@ -21,7 +21,31 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+To define tasks for managing a docker image:
+
+```ruby
+RakeDocker.define_image_tasks(
+  image_name: 'my-image'
+) do |t|
+  t.work_directory = 'build/images'
+
+  t.copy_spec = [
+    'src/my-image/Dockerfile',
+    'src/my-image/start.sh'
+  ]
+
+  t.repository_name = 'my-image'
+  t.repository_url = 'my-org/my-image'
+
+  t.credentials = YAML.load_file(
+    'config/secrets/dockerhub/credentials.yaml'
+  )
+
+  t.platform = 'linux/amd64'
+
+  t.tags = ['1.2.3', 'latest']
+end
+```
 
 ## Development
 
@@ -34,21 +58,6 @@ release a new version, update the version number in `version.rb`, and then run
 `bundle exec rake release`, which will create a git tag for the version, push
 git commits and tags, and push the `.gem` file to
 [rubygems.org](https://rubygems.org).
-
-### Copying files to Docker Container
-
-The `RakeDocker.define_image_tasks()` in the `Rakefile` returns a list of 
-`Tasks`. To `COPY` files to a Docker container, configure the tasks by setting
-the `copy_spec` attribute on the `Task` object to a list of file paths.
-
-Example:
-```
-t.copy_spec = [
-    'project_root/path/to/file1',
-    'project_root/path/to/file2',
-    'project_root/path/to/file3'
-]
-```
 
 ### Managing CircleCI keys
 

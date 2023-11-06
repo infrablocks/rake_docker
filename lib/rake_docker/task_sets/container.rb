@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require 'rake_factory'
 require 'docker'
 
 require_relative '../tasks'
+require_relative '../container'
 
 module RakeDocker
   module TaskSets
@@ -15,7 +18,8 @@ module RakeDocker
 
       parameter :ready_check
 
-      parameter :reporter
+      parameter :reporter,
+                default: RakeDocker::Container::PrintingReporter.new
 
       parameter :provision_task_name, default: :provision
       parameter :destroy_task_name, default: :destroy

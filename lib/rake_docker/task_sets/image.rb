@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rake_factory'
 require 'docker'
 
@@ -24,6 +26,7 @@ module RakeDocker
       parameter :credentials
 
       parameter :build_args
+      parameter :platform
 
       parameter :clean_task_name, default: :clean
       parameter :prepare_task_name, default: :prepare

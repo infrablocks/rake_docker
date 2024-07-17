@@ -28,7 +28,7 @@ module RakeDocker
 
         t.tags.each do |tag|
           image.tag(repo: t.repository_url,
-                    tag: tag,
+                    tag:,
                     force: true)
         end
       end

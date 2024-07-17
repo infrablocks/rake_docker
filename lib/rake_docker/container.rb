@@ -227,7 +227,7 @@ module RakeDocker
         name, image, exposed_ports, port_bindings, environment
       )
         {
-          name: name,
+          name:,
           Image: image,
           ExposedPorts: exposed_ports,
           HostConfig: { PortBindings: port_bindings },

@@ -21,7 +21,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       provisioner = RakeDocker::Container::Provisioner
-                    .new(name, image, reporter: reporter)
+                    .new(name, image, reporter:)
 
       provisioner.execute
 
@@ -57,7 +57,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       provisioner = RakeDocker::Container::Provisioner
-                    .new(name, image, reporter: reporter)
+                    .new(name, image, reporter:)
 
       provisioner.execute
 
@@ -101,14 +101,14 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       provisioner = RakeDocker::Container::Provisioner
-                    .new(name, image, reporter: reporter)
+                    .new(name, image, reporter:)
 
       provisioner.execute
 
       expect(Docker::Image).not_to(have_received(:create))
       expect(Docker::Container)
         .to(have_received(:create)
-              .with(hash_including(name: name, Image: image)))
+              .with(hash_including(name:, Image: image)))
       expect(underlying_container).to(have_received(:start))
       expect(reporter.messages)
         .to(eq([
@@ -147,7 +147,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       provisioner = RakeDocker::Container::Provisioner
-                    .new(name, image, reporter: reporter)
+                    .new(name, image, reporter:)
 
       provisioner.execute
 
@@ -155,7 +155,7 @@ describe RakeDocker::Container do
         .to(have_received(:create).with(fromImage: image))
       expect(Docker::Container)
         .to(have_received(:create)
-              .with(hash_including(name: name, Image: image)))
+              .with(hash_including(name:, Image: image)))
       expect(underlying_container)
         .to(have_received(:start))
       expect(reporter.messages)
@@ -200,8 +200,8 @@ describe RakeDocker::Container do
       provisioner = RakeDocker::Container::Provisioner
                     .new(
                       name, image,
-                      reporter: reporter,
-                      environment: environment
+                      reporter:,
+                      environment:
                     )
 
       provisioner.execute
@@ -233,8 +233,8 @@ describe RakeDocker::Container do
       provisioner = RakeDocker::Container::Provisioner
                     .new(
                       name, image,
-                      reporter: reporter,
-                      ports: ports
+                      reporter:,
+                      ports:
                     )
 
       provisioner.execute
@@ -282,7 +282,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       provisioner = RakeDocker::Container::Provisioner
-                    .new(name, image, reporter: reporter, ready?: ready)
+                    .new(name, image, reporter:, ready?: ready)
 
       provisioner.execute
 
@@ -315,7 +315,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       destroyer = RakeDocker::Container::Destroyer
-                  .new(name, reporter: reporter)
+                  .new(name, reporter:)
 
       destroyer.execute
 
@@ -341,7 +341,7 @@ describe RakeDocker::Container do
 
       reporter = MockReporter.new
       destroyer = RakeDocker::Container::Destroyer
-                  .new(name, reporter: reporter)
+                  .new(name, reporter:)
 
       destroyer.execute
 

@@ -125,7 +125,7 @@ describe RakeDocker::Tasks::Build do
       image_name: 'nginx',
       repository_name: 'my-org/thing',
       work_directory: 'build',
-      credentials: credentials
+      credentials:
     )
 
     allow(Docker).to(receive(:authenticate!))

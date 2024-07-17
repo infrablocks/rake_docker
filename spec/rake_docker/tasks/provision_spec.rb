@@ -107,12 +107,12 @@ describe RakeDocker::Tasks::Provision do
     allow(provisioner).to(receive(:execute))
 
     described_class.define(
-      container_name: container_name,
-      image: image,
-      ports: ports,
-      environment: environment,
-      reporter: reporter,
-      ready_check: ready_check
+      container_name:,
+      image:,
+      ports:,
+      environment:,
+      reporter:,
+      ready_check:
     )
 
     rake_task = Rake::Task['provision']
@@ -124,9 +124,9 @@ describe RakeDocker::Tasks::Provision do
             .with(
               container_name,
               image,
-              ports: ports,
-              environment: environment,
-              reporter: reporter,
+              ports:,
+              environment:,
+              reporter:,
               ready?: ready_check
             ))
     expect(provisioner).to(have_received(:execute))

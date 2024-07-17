@@ -82,7 +82,7 @@ describe RakeDocker::Tasks::Tag do
 
     namespace :image do
       described_class.define(
-        argument_names: argument_names,
+        argument_names:,
         image_name: 'image',
         repository_name: 'my-org/image',
         repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image',
@@ -153,8 +153,8 @@ describe RakeDocker::Tasks::Tag do
     namespace :image do
       described_class.define(
         image_name: 'nginx',
-        repository_name: repository_name,
-        repository_url: repository_url,
+        repository_name:,
+        repository_url:,
 
         tags: [tag1, tag2]
       )
@@ -187,7 +187,7 @@ describe RakeDocker::Tasks::Tag do
       described_class.define(
         argument_names: [:org_name],
         image_name: 'nginx',
-        repository_name: repository_name,
+        repository_name:,
         tags: [tag]
       ) do |t, args|
         t.repository_url =
@@ -209,7 +209,7 @@ describe RakeDocker::Tasks::Tag do
     expect(image)
       .to(have_received(:tag)
             .with(repo: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
-                  tag: tag,
+                  tag:,
                   force: true))
   end
 
@@ -223,8 +223,8 @@ describe RakeDocker::Tasks::Tag do
         argument_names: [:org_name],
 
         image_name: 'nginx',
-        repository_name: repository_name,
-        repository_url: repository_url
+        repository_name:,
+        repository_url:
       ) do |t, args|
         t.tags = ["#{t.image_name}-123", 'latest', args.org_name]
       end
@@ -266,8 +266,8 @@ describe RakeDocker::Tasks::Tag do
     namespace :image do
       described_class.define(
         image_name: 'nginx',
-        repository_name: repository_name,
-        repository_url: repository_url,
+        repository_name:,
+        repository_url:,
 
         tags: [tag]
       )

@@ -78,8 +78,8 @@ describe RakeDocker::Tasks::Destroy do
       .to(receive(:execute))
 
     described_class.define(
-      container_name: container_name,
-      reporter: reporter
+      container_name:,
+      reporter:
     )
 
     task = Rake::Task['destroy']
@@ -90,7 +90,7 @@ describe RakeDocker::Tasks::Destroy do
       .to(have_received(:new)
             .with(
               container_name,
-              reporter: reporter
+              reporter:
             ))
     expect(destroyer).to(have_received(:execute))
   end

@@ -43,7 +43,7 @@ describe RakeDocker::TaskSets::Container do
       container_name = 'database'
 
       define_tasks(
-        container_name: container_name
+        container_name:
       )
 
       rake_task = Rake::Task['provision']
@@ -55,7 +55,7 @@ describe RakeDocker::TaskSets::Container do
       image = 'mysql:5.6'
 
       define_tasks(
-        image: image
+        image:
       )
 
       rake_task = Rake::Task['provision']
@@ -67,7 +67,7 @@ describe RakeDocker::TaskSets::Container do
       ports = ['3306:3306']
 
       define_tasks(
-        ports: ports
+        ports:
       )
 
       rake_task = Rake::Task['provision']
@@ -79,7 +79,7 @@ describe RakeDocker::TaskSets::Container do
       environment = { 'MYSQL_USERNAME' => 'db_admin' }
 
       define_tasks(
-        environment: environment
+        environment:
       )
 
       rake_task = Rake::Task['provision']
@@ -91,7 +91,7 @@ describe RakeDocker::TaskSets::Container do
       ready_check = proc { true }
 
       define_tasks(
-        ready_check: ready_check
+        ready_check:
       )
 
       rake_task = Rake::Task['provision']
@@ -103,7 +103,7 @@ describe RakeDocker::TaskSets::Container do
       reporter = RakeDocker::Container::NullReporter.new
 
       define_tasks(
-        reporter: reporter
+        reporter:
       )
 
       rake_task = Rake::Task['provision']
@@ -131,7 +131,7 @@ describe RakeDocker::TaskSets::Container do
       container_name = 'database'
 
       define_tasks(
-        container_name: container_name
+        container_name:
       )
 
       rake_task = Rake::Task['destroy']
@@ -143,7 +143,7 @@ describe RakeDocker::TaskSets::Container do
       reporter = RakeDocker::Container::NullReporter.new
 
       define_tasks(
-        reporter: reporter
+        reporter:
       )
 
       rake_task = Rake::Task['destroy']

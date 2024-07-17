@@ -32,9 +32,9 @@ module RakeDocker
 
       def make_credentials_hash(email, password, username, proxy_endpoint)
         {
-          username: username,
-          password: password,
-          email: email,
+          username:,
+          password:,
+          email:,
           serveraddress: proxy_endpoint
         }
       end

@@ -28,7 +28,7 @@ module RakeDocker
 
         image = images.first
         t.tags.each do |tag|
-          image.push(nil, tag: tag) do |chunk|
+          image.push(nil, tag:) do |chunk|
             Output.print chunk
           end
         end

@@ -47,7 +47,7 @@ describe RakeDocker::TaskSets::Image do
       image_name = 'apache'
 
       define_tasks(
-        image_name: image_name
+        image_name:
       )
 
       rake_task = Rake::Task['clean']
@@ -59,7 +59,7 @@ describe RakeDocker::TaskSets::Image do
       work_directory = 'tmp'
 
       define_tasks(
-        work_directory: work_directory
+        work_directory:
       )
 
       rake_task = Rake::Task['clean']
@@ -87,7 +87,7 @@ describe RakeDocker::TaskSets::Image do
       image_name = 'apache'
 
       define_tasks(
-        image_name: image_name
+        image_name:
       )
 
       rake_task = Rake::Task['prepare']
@@ -99,7 +99,7 @@ describe RakeDocker::TaskSets::Image do
       work_directory = 'tmp'
 
       define_tasks(
-        work_directory: work_directory
+        work_directory:
       )
 
       rake_task = Rake::Task['prepare']
@@ -118,7 +118,7 @@ describe RakeDocker::TaskSets::Image do
     it 'passes the provided copy spec when supplied' do
       copy_spec = %w[file1.txt file2.rb]
 
-      define_tasks(copy_spec: copy_spec)
+      define_tasks(copy_spec:)
 
       rake_task = Rake::Task['prepare']
 
@@ -138,7 +138,7 @@ describe RakeDocker::TaskSets::Image do
         { content: 'some-content', to: 'some-file.txt' }
       ]
 
-      define_tasks(create_spec: create_spec)
+      define_tasks(create_spec:)
 
       rake_task = Rake::Task['prepare']
 
@@ -165,7 +165,7 @@ describe RakeDocker::TaskSets::Image do
       image_name = 'apache'
 
       define_tasks(
-        image_name: image_name
+        image_name:
       )
 
       rake_task = Rake::Task['build']
@@ -177,7 +177,7 @@ describe RakeDocker::TaskSets::Image do
       repository_name = 'apache/apache'
 
       define_tasks(
-        repository_name: repository_name
+        repository_name:
       )
 
       rake_task = Rake::Task['build']
@@ -189,7 +189,7 @@ describe RakeDocker::TaskSets::Image do
       work_directory = 'tmp'
 
       define_tasks(
-        work_directory: work_directory
+        work_directory:
       )
 
       rake_task = Rake::Task['build']
@@ -240,7 +240,7 @@ describe RakeDocker::TaskSets::Image do
         username: 'username'
       }
 
-      define_tasks(credentials: credentials)
+      define_tasks(credentials:)
 
       rake_task = Rake::Task['build']
 
@@ -260,7 +260,7 @@ describe RakeDocker::TaskSets::Image do
         SOMETHING_IMPORTANT: 'the-value'
       }
 
-      define_tasks(build_args: build_args)
+      define_tasks(build_args:)
 
       rake_task = Rake::Task['build']
 
@@ -278,7 +278,7 @@ describe RakeDocker::TaskSets::Image do
     it 'passes the provided platform when supplied' do
       platform = 'linux/amd64'
 
-      define_tasks(platform: platform)
+      define_tasks(platform:)
 
       rake_task = Rake::Task['build']
 
@@ -307,7 +307,7 @@ describe RakeDocker::TaskSets::Image do
       image_name = 'apache'
 
       define_tasks(
-        image_name: image_name
+        image_name:
       )
 
       rake_task = Rake::Task['tag']
@@ -319,7 +319,7 @@ describe RakeDocker::TaskSets::Image do
       repository_name = 'apache/apache'
 
       define_tasks(
-        repository_name: repository_name
+        repository_name:
       )
 
       rake_task = Rake::Task['tag']
@@ -331,7 +331,7 @@ describe RakeDocker::TaskSets::Image do
       repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
       define_tasks(
-        repository_url: repository_url
+        repository_url:
       )
 
       rake_task = Rake::Task['tag']
@@ -343,7 +343,7 @@ describe RakeDocker::TaskSets::Image do
       tags = ['latest']
 
       define_tasks(
-        tags: tags
+        tags:
       )
 
       rake_task = Rake::Task['tag']
@@ -387,7 +387,7 @@ describe RakeDocker::TaskSets::Image do
       image_name = 'apache'
 
       define_tasks(
-        image_name: image_name
+        image_name:
       )
 
       rake_task = Rake::Task['push']
@@ -399,7 +399,7 @@ describe RakeDocker::TaskSets::Image do
       repository_url = '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx'
 
       define_tasks(
-        repository_url: repository_url
+        repository_url:
       )
 
       rake_task = Rake::Task['push']
@@ -411,7 +411,7 @@ describe RakeDocker::TaskSets::Image do
       tags = ['latest']
 
       define_tasks(
-        tags: tags
+        tags:
       )
 
       rake_task = Rake::Task['push']
@@ -446,7 +446,7 @@ describe RakeDocker::TaskSets::Image do
         username: 'username'
       }
 
-      define_tasks(credentials: credentials)
+      define_tasks(credentials:)
 
       rake_task = Rake::Task['push']
 
@@ -474,7 +474,7 @@ describe RakeDocker::TaskSets::Image do
     it 'configures with the provided image name' do
       image_name = 'apache'
 
-      define_tasks(image_name: image_name)
+      define_tasks(image_name:)
 
       rake_task = Rake::Task['publish']
 

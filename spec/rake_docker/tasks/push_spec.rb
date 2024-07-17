@@ -78,7 +78,7 @@ describe RakeDocker::Tasks::Push do
 
     namespace :image do
       described_class.define(
-        argument_names: argument_names,
+        argument_names:,
         image_name: 'image2',
         repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/image2',
         tags: ['latest']
@@ -124,7 +124,7 @@ describe RakeDocker::Tasks::Push do
         image_name: 'nginx',
         repository_url: '123.dkr.ecr.eu-west-2.amazonaws.com/my-org/nginx',
 
-        credentials: credentials,
+        credentials:,
         tags: ['latest']
       )
     end
@@ -197,7 +197,7 @@ describe RakeDocker::Tasks::Push do
     namespace :image do
       described_class.define(
         image_name: 'nginx',
-        repository_url: repository_url,
+        repository_url:,
         tags: %w[latest 1.2.3]
       )
     end
@@ -254,7 +254,7 @@ describe RakeDocker::Tasks::Push do
       described_class.define(
         argument_names: [:org_name],
         image_name: 'nginx',
-        repository_url: repository_url
+        repository_url:
       ) do |t, args|
         t.tags = ["#{t.image_name}_#{args.org_name}"]
       end
@@ -281,7 +281,7 @@ describe RakeDocker::Tasks::Push do
     namespace :image do
       described_class.define(
         image_name: 'nginx',
-        repository_url: repository_url,
+        repository_url:,
         tags: [tag]
       )
     end
@@ -307,7 +307,7 @@ describe RakeDocker::Tasks::Push do
     namespace :image do
       described_class.define(
         image_name: 'nginx',
-        repository_url: repository_url,
+        repository_url:,
         tags: ['latest']
       )
     end

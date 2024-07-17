@@ -74,8 +74,8 @@ describe RakeDocker::Authentication::ECR do
 
     expect(aws_ecr.call)
       .to(include(
-            username: username,
-            password: password
+            username:,
+            password:
           ))
   end
 
@@ -131,7 +131,7 @@ describe RakeDocker::Authentication::ECR do
     client = ecr_client_double
     allow(Aws::ECR::Client)
       .to(receive(:new)
-            .with(region: region)
+            .with(region:)
             .and_return(client))
     client
   end

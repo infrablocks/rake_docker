@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'aws-sdk-ecr', '~> 1.2'
   spec.add_dependency 'colored2', '~> 3.1'
-  spec.add_dependency 'docker-api', '>= 1.34', '< 3.0'
+  spec.add_dependency 'docker-api', '>= 2.3', '< 3.0'
   spec.add_dependency 'rake_factory', '~> 0.33'
 
   spec.add_development_dependency 'activesupport'

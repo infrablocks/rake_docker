@@ -16,6 +16,7 @@ module RakeDocker
       parameter :image, required: true
       parameter :ports
       parameter :environment
+      parameter :command
 
       parameter :ready_check
 
@@ -28,6 +29,7 @@ module RakeDocker
           t.image,
           ports: t.ports,
           environment: t.environment,
+          command: t.command,
           ready?: t.ready_check,
           reporter: t.reporter
         )

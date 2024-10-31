@@ -44,11 +44,11 @@ GEM
     connection_pool (2.4.1)
     diff-lcs (1.5.1)
     docile (1.4.1)
-    docker-api (2.3.0)
+    docker-api (2.4.0)
       excon (>= 0.64.0)
       multi_json
     drb (2.2.1)
-    excon (0.111.0)
+    excon (0.112.0)
     faraday (2.10.0)
       faraday-net_http (>= 2.0, < 3.2)
       logger

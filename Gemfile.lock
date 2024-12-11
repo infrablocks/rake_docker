@@ -10,7 +10,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.2.2)
+    activesupport (7.2.2.1)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -38,7 +38,7 @@ GEM
     aws-sigv4 (1.10.0)
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.2.0)
-    benchmark (0.3.0)
+    benchmark (0.4.0)
     bigdecimal (3.1.8)
     childprocess (5.0.0)
     colored2 (3.1.2)
@@ -72,9 +72,9 @@ GEM
       childprocess (~> 5.0.0)
       hamster (~> 3.0)
       open4 (~> 1.3)
-    logger (1.6.1)
+    logger (1.6.2)
     memfs (1.0.0)
-    minitest (5.25.1)
+    minitest (5.25.4)
     multi_json (1.15.0)
     net-http (0.4.1)
       uri
@@ -160,7 +160,7 @@ GEM
     sawyer (0.9.2)
       addressable (>= 2.3.5)
       faraday (>= 0.17.3, < 3)
-    securerandom (0.3.1)
+    securerandom (0.4.0)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)

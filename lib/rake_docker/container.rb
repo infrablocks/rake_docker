@@ -145,7 +145,13 @@ module RakeDocker
     class Provisioner
       include Utilities
 
-      attr_reader :name, :image, :ports, :environment, :ready, :reporter
+      attr_reader :name,
+                  :image,
+                  :ports,
+                  :environment,
+                  :ready,
+                  :reporter,
+                  :command
 
       def initialize(name, image, opts = {})
         @name = name
@@ -154,6 +160,7 @@ module RakeDocker
         @ports = opts[:ports] || []
         @ready = opts[:ready?]
         @reporter = opts[:reporter] || NullReporter.new
+        @command = opts[:command]
       end
 
       # rubocop:disable Metrics/AbcSize
@@ -165,7 +172,7 @@ module RakeDocker
           ensure_container_running(container)
         else
           reporter.container_does_not_exist(name)
-          start_new_container(name, image, ports, environment)
+          start_new_container(name, image, ports, environment, command)
         end
         reporter.done
       end
@@ -173,9 +180,9 @@ module RakeDocker
 
       private
 
-      def start_new_container(name, image, ports, environment)
+      def start_new_container(name, image, ports, environment, command)
         ensure_image_available(image)
-        create_and_start_container(name, image, ports, environment)
+        create_and_start_container(name, image, ports, environment, command)
       end
 
       def ensure_image_available(image)
@@ -206,16 +213,17 @@ module RakeDocker
         end
       end
 
-      def create_and_start_container(name, image, ports, environment)
-        start_container(create_container(image, name, ports, environment))
+      def create_and_start_container(name, image, ports, environment, command)
+        start_container(create_container(image, name, ports, environment,
+                                         command))
       end
 
-      def create_container(image, name, ports, environment)
+      def create_container(image, name, ports, environment, command)
         exposed_ports, port_bindings = process_ports(ports)
         reporter.creating_container(name, image)
         container = Docker::Container.create(
           make_container_options(
-            name, image, exposed_ports, port_bindings, environment
+            name, image, exposed_ports, port_bindings, environment, command
           )
         )
         container = enhance_with_name(container, name)
@@ -223,17 +231,20 @@ module RakeDocker
         container
       end
 
+      # rubocop:disable Metrics/ParameterLists
       def make_container_options(
-        name, image, exposed_ports, port_bindings, environment
+        name, image, exposed_ports, port_bindings, environment, command
       )
         {
           name:,
           Image: image,
           ExposedPorts: exposed_ports,
           HostConfig: { PortBindings: port_bindings },
-          Env: environment
+          Env: environment,
+          Cmd: command
         }
       end
+      # rubocop:enable Metrics/ParameterLists
 
       def start_container(container)
         reporter.starting_container(container)

@@ -97,6 +97,7 @@ describe RakeDocker::Tasks::Provision do
       'THING1' => 'one',
       'THING2' => 'two'
     }
+    command = ['ls', '-l']
     reporter = RakeDocker::Container::NullReporter.new
     ready_check = proc { true }
 
@@ -111,6 +112,7 @@ describe RakeDocker::Tasks::Provision do
       image:,
       ports:,
       environment:,
+      command:,
       reporter:,
       ready_check:
     )
@@ -126,6 +128,7 @@ describe RakeDocker::Tasks::Provision do
               image,
               ports:,
               environment:,
+              command:,
               reporter:,
               ready?: ready_check
             ))

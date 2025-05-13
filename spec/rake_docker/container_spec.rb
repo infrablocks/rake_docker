@@ -254,6 +254,70 @@ describe RakeDocker::Container do
               ))
     end
 
+    it 'passes the provided command when creating the container' do
+      name = 'my-container'
+      image = 'nginx:latest'
+      command = ['ls', '-l']
+      underlying_image = instance_double(Docker::Image, image)
+      underlying_container = MockDockerContainer.created(name)
+
+      allow(Docker::Container)
+        .to(receive(:get).with(name)
+                         .and_raise(Docker::Error::NotFoundError))
+      allow(Docker::Image)
+        .to(receive(:all).with(filters: filters(image))
+                         .and_return([underlying_image]))
+      allow(underlying_container).to(receive(:start))
+      allow(Docker::Container)
+        .to(receive(:create)
+              .and_return(underlying_container))
+
+      reporter = MockReporter.new
+      provisioner = RakeDocker::Container::Provisioner
+                    .new(
+                      name, image,
+                      reporter:,
+                      command:
+                    )
+
+      provisioner.execute
+
+      expect(Docker::Container)
+        .to(have_received(:create)
+              .with(hash_including(Cmd: command)))
+    end
+
+    it 'passes nil for the command when creating container with no command' do
+      name = 'my-container'
+      image = 'nginx:latest'
+      underlying_image = instance_double(Docker::Image, image)
+      underlying_container = MockDockerContainer.created(name)
+
+      allow(Docker::Container)
+        .to(receive(:get).with(name)
+                         .and_raise(Docker::Error::NotFoundError))
+      allow(Docker::Image)
+        .to(receive(:all).with(filters: filters(image))
+                         .and_return([underlying_image]))
+      allow(underlying_container).to(receive(:start))
+      allow(Docker::Container)
+        .to(receive(:create)
+              .and_return(underlying_container))
+
+      reporter = MockReporter.new
+      provisioner = RakeDocker::Container::Provisioner
+                    .new(
+                      name, image,
+                      reporter:
+                    )
+
+      provisioner.execute
+
+      expect(Docker::Container)
+        .to(have_received(:create)
+              .with(hash_including(Cmd: nil)))
+    end
+
     # rubocop:disable RSpec/MultipleExpectations
     it 'calls the supplied readiness poller when provided' do
       name = 'my-container'

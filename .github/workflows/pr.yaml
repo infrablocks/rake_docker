@@ -30,7 +30,7 @@ jobs:
       - name: Install tools
         uses: infrablocks/github-actions/asdf_install@v1
       - name: Test
-        run: ./go spec
+        run: ./go test:unit
       - name: Notify Slack
         if: ${{ !cancelled() }}
         continue-on-error: true
